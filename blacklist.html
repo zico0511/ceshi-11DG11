@@ -159,7 +159,6 @@
   <div class="container">
     <h1>黑名單管理</h1>
 
-    <!-- 黑名單新增表單 -->
     <form id="blacklistForm">
       <label for="lineId">LINE ID：</label>
       <input type="text" id="lineId" required placeholder="輸入 LINE ID" />
@@ -170,10 +169,8 @@
       <button type="submit" class="button">新增到黑名單</button>
     </form>
 
-    <hr>
-
     <h2>黑名單列表</h2>
-    <table id="blacklistTable">
+    <table>
       <thead>
         <tr>
           <th>LINE ID</th>
@@ -183,66 +180,76 @@
         </tr>
       </thead>
       <tbody id="blacklistItems">
-        <!-- 這裡會顯示所有被加入的黑名單資料 -->
+        <!-- 黑名單資料會出現在這裡 -->
       </tbody>
     </table>
+
+    <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
   </div>
 
-  <script>
-    // 顯示黑名單
-    function loadBlacklist() {
-      const blacklist = JSON.parse(localStorage.getItem('blacklist')) || [];
-      const blacklistItems = document.getElementById('blacklistItems');
-      blacklistItems.innerHTML = '';
+  <!-- Firebase SDK v9 兼容版 -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
-      blacklist.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${item.lineId}</td>
-          <td>${item.reason}</td>
-          <td>${item.operatorId}</td>
-          <td><button onclick="removeBlacklistItem('${item.lineId}')">刪除</button></td>
-        `;
-        blacklistItems.appendChild(row);
+  <script>
+    // ✅ 你的 Firebase 設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+      authDomain: "dg11-c954c.firebaseapp.com",
+      projectId: "dg11-c954c"
+    };
+
+    // 初始化
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const tableBody = document.getElementById("blacklistItems");
+
+    // 監聽並顯示列表
+    function renderList() {
+      db.collection("blacklist").orderBy("time", "desc").onSnapshot(snapshot => {
+        tableBody.innerHTML = "";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${data.lineId}</td>
+            <td>${data.reason}</td>
+            <td>${data.operatorId || "未知"}</td>
+            <td><button onclick="deleteItem('${doc.id}')">刪除</button></td>
+          `;
+          tableBody.appendChild(row);
+        });
       });
     }
 
+    renderList();
+
     // 新增黑名單
-    document.getElementById('blacklistForm').addEventListener('submit', function(e) {
+    document.getElementById("blacklistForm").addEventListener("submit", e => {
       e.preventDefault();
+      const lineId = document.getElementById("lineId").value.trim();
+      const reason = document.getElementById("reason").value.trim();
+      const operatorId = localStorage.getItem("loggedInUser") || "未知";
 
-      const lineId = document.getElementById('lineId').value;
-      const reason = document.getElementById('reason').value;
+      if (!lineId || !reason) return alert("請填寫所有欄位");
 
-      // 確認用戶是否登入
-      const operatorId = localStorage.getItem('loggedInUser');  // 獲取當前登入用戶ID
-      if (!operatorId) {
-        alert("請先登入!");
-        return;
-      }
-
-      // 新增黑名單資料
-      const blacklist = JSON.parse(localStorage.getItem('blacklist')) || [];
-      blacklist.push({ lineId, reason, operatorId });
-      localStorage.setItem('blacklist', JSON.stringify(blacklist));
-
-      // 重載黑名單列表
-      loadBlacklist();
-
-      alert('已成功新增至黑名單');
+      db.collection("blacklist").add({
+        lineId,
+        reason,
+        operatorId,
+        time: new Date()
+      }).then(() => {
+        document.getElementById("lineId").value = "";
+        document.getElementById("reason").value = "";
+      });
     });
 
-    // 刪除黑名單項目
-    function removeBlacklistItem(lineId) {
-      let blacklist = JSON.parse(localStorage.getItem('blacklist')) || [];
-      blacklist = blacklist.filter(item => item.lineId !== lineId);
-      localStorage.setItem('blacklist', JSON.stringify(blacklist));
-      loadBlacklist();
+    // 刪除資料
+    function deleteItem(id) {
+      if (confirm("確定要刪除這筆資料嗎？")) {
+        db.collection("blacklist").doc(id).delete();
+      }
     }
-
-    // 初始化時加載黑名單
-    loadBlacklist();
   </script>
-    <a href="home.html" class="back-to-home-btn" title="返回主頁">🏠 返回主頁</a>
 </body>
 </html>
