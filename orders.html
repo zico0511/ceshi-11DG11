@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>11DG11 訂單管理</title>
   <link rel="icon" href="favicon.png">
+   <!-- Firebase CDN -->
+   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
   <style>
     :root {
       --primary: #d63384;
@@ -261,9 +264,23 @@
 <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
 
 <script>
+  // 初始化 Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+    authDomain: "dg11-c954c.firebaseapp.com",
+    projectId: "dg11-c954c",
+    storageBucket: "dg11-c954c.firebasestorage.app",
+    messagingSenderId: "1010585577335",
+    appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const ordersRef = db.collection("orders");
+
   let ordersVisible = true;
 
-  function addOrder() {
+  async function addOrder() {
     const name = document.getElementById('productName').value.trim();
     const customer = document.getElementById('customerName').value.trim();
     const cost = parseFloat(document.getElementById('productCost').value);
@@ -276,45 +293,38 @@
     }
 
     const orderDate = customDate ? customDate : new Date().toISOString().split('T')[0];
-
     const order = {
-      id: Date.now(),
       name,
       customer,
       cost,
       price,
       profit: price - cost,
-      date: orderDate
+      date: orderDate,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
-
-    document.getElementById('productName').value = '';
-    document.getElementById('customerName').value = '';
-    document.getElementById('productCost').value = '';
-    document.getElementById('productPrice').value = '';
-    document.getElementById('customDate').value = '';
-
+    await ordersRef.add(order);
+    clearForm();
     renderOrders();
     updateTotalProfit();
   }
 
-  function renderOrders(forceShow = false) {
+  async function renderOrders(forceShow = false) {
     const container = document.getElementById('orderList');
     const wrapper = document.getElementById('orderListContainer');
     const searchProduct = document.getElementById('searchProduct').value.trim().toLowerCase();
     const searchCustomer = document.getElementById('searchCustomer').value.trim().toLowerCase();
-    container.innerHTML = '';
 
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const snapshot = await ordersRef.orderBy("createdAt", "desc").get();
+    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     const filtered = orders.filter(order => {
       const name = order.name?.toLowerCase() || '';
       const customer = order.customer?.toLowerCase() || '';
       return name.includes(searchProduct) && customer.includes(searchCustomer);
     });
+
+    container.innerHTML = '';
 
     if (forceShow) {
       ordersVisible = true;
@@ -333,7 +343,7 @@
         <p><strong>${order.name}</strong>（客戶：${order.customer}）</p>
         <p>售價：${order.price}，成本：${order.cost}，利潤：${order.profit}</p>
         <p>日期：${order.date}</p>
-        <button onclick="deleteOrder(${order.id})">刪除</button>
+        <button onclick="deleteOrder('${order.id}')">刪除</button>
       `;
       container.appendChild(div);
     });
@@ -345,30 +355,34 @@
     container.style.display = ordersVisible ? 'block' : 'none';
   }
 
-  function deleteOrder(id) {
-    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    orders = orders.filter(order => order.id !== id);
-    localStorage.setItem('orders', JSON.stringify(orders));
+  async function deleteOrder(id) {
+    await ordersRef.doc(id).delete();
     renderOrders();
     updateTotalProfit();
   }
 
-  function clearAllOrders() {
+  async function clearAllOrders() {
     if (confirm('確定要刪除所有訂單嗎？此操作無法復原。')) {
-      localStorage.removeItem('orders');
+      const snapshot = await ordersRef.get();
+      const batch = db.batch();
+      snapshot.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
       renderOrders();
       updateTotalProfit();
     }
   }
 
-  function updateTotalProfit() {
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const totalProfit = orders.reduce((sum, o) => sum + o.profit, 0);
+  async function updateTotalProfit() {
+    const snapshot = await ordersRef.get();
+    const orders = snapshot.docs.map(doc => doc.data());
+    const totalProfit = orders.reduce((sum, o) => sum + (o.profit || 0), 0);
     document.getElementById('totalProfit').innerText = `目前總利潤：${totalProfit}`;
   }
 
-  function exportToCSV() {
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+  async function exportToCSV() {
+    const snapshot = await ordersRef.get();
+    const orders = snapshot.docs.map(doc => doc.data());
+
     if (orders.length === 0) {
       alert('目前沒有任何訂單可匯出。');
       return;
@@ -394,8 +408,10 @@
     link.click();
   }
 
-  function exportToExcel() {
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+  async function exportToExcel() {
+    const snapshot = await ordersRef.get();
+    const orders = snapshot.docs.map(doc => doc.data());
+
     if (orders.length === 0) {
       alert('目前沒有任何訂單可匯出。');
       return;
@@ -431,11 +447,18 @@
     link.click();
   }
 
+  function clearForm() {
+    document.getElementById('productName').value = '';
+    document.getElementById('customerName').value = '';
+    document.getElementById('productCost').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('customDate').value = '';
+  }
+
   window.onload = function () {
     renderOrders();
     updateTotalProfit();
   };
 </script>
-
 </body>
 </html>
