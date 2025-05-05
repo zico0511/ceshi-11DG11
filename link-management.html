@@ -269,5 +269,63 @@
 
   <a href="home.html" class="back-to-home-btn" title="返回主頁">🏠 返回主頁</a>
   <script src="link-management.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+        authDomain: "dg11-c954c.firebaseapp.com",
+        projectId: "dg11-c954c"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
+  
+    <script>
+      const form = document.getElementById("linkForm");
+      const linkItems = document.getElementById("linkItems");
+  
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("linkName").value.trim();
+        const url = document.getElementById("url").value.trim();
+        const operator = localStorage.getItem("loggedInUser") || "guest";
+  
+        if (!name || !url) return;
+  
+        await db.collection("links").add({
+          title: name,
+          url: url,
+          operator: operator,
+          time: new Date()
+        });
+  
+        form.reset();
+      });
+  
+      function deleteLink(id) {
+        if (confirm("確定要刪除這筆網址嗎？")) {
+          db.collection("links").doc(id).delete();
+        }
+      }
+  
+      db.collection("links").orderBy("time", "desc").onSnapshot(snapshot => {
+        linkItems.innerHTML = "";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${data.title}</td>
+            <td><a href="${data.url}" target="_blank">${data.url}</a></td>
+            <td><button class="action-btn" onclick="deleteLink('${doc.id}')">刪除</button></td>
+          `;
+          linkItems.appendChild(row);
+        });
+      });
+    </script>
+    
 </body>
 </html>
