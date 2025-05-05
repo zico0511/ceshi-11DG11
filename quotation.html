@@ -284,7 +284,7 @@
         
     
 </head>
-<body>
+<body>  
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="#">
@@ -846,8 +846,145 @@
                 });
             }
         });
-        
+      
     </script>
-    <a href="home.html" class="return-home-btn">🏠 返回主頁</a>
+      <a href="home.html" class="return-home-btn">🏠 返回主頁</a>
+<!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  
+    const firebaseConfig = {
+      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+      authDomain: "dg11-c954c.firebaseapp.com",
+      projectId: "dg11-c954c",
+      storageBucket: "dg11-c954c.appspot.com",
+      messagingSenderId: "1010585577335",
+      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+    };
+  
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    window.firestoreDB = db;
+  </script>
+  
+  <script type="module">
+    import {
+      getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  
+    window.addEventListener("DOMContentLoaded", () => {
+      const db = window.firestoreDB;
+      const quotesCollection = collection(db, "quotations");
+  
+      async function saveQuoteToFirestore(quote) {
+        try {
+          await addDoc(quotesCollection, quote);
+        } catch (error) {
+          console.error("儲存報價到 Firestore 時發生錯誤:", error);
+        }
+      }
+  
+      async function displayHistory() {
+        const snapshot = await getDocs(quotesCollection);
+        const tableBody = document.querySelector("#historyTable tbody");
+        if (!tableBody) return;
+  
+        tableBody.innerHTML = "";
+  
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${data.productId || ""}</td>
+            <td>${data.name || ""}</td>
+            <td>${data.category || ""}</td>
+            <td>${data.cost || ""}</td>
+            <td>${data.weight || ""}</td>
+            <td>${data.calculatedPrice || ""}</td>
+            <td>${data.currency || ""}</td>
+            <td><button class="deleteBtn" data-id="${docSnap.id}">刪除</button></td>
+          `;
+          tableBody.appendChild(row);
+        });
+  
+        document.querySelectorAll(".deleteBtn").forEach(button => {
+          button.addEventListener("click", async function () {
+            const id = this.getAttribute("data-id");
+            await deleteDoc(doc(db, "quotations", id));
+            displayHistory();
+          });
+        });
+      }
+  
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) {
+        searchInput.addEventListener("input", async function () {
+          const keyword = this.value.trim();
+          const tableBody = document.querySelector("#historyTable tbody");
+          if (!tableBody) return;
+  
+          tableBody.innerHTML = "";
+  
+          if (keyword === "") {
+            displayHistory();
+            return;
+          }
+  
+          const q = query(quotesCollection, where("productId", "==", keyword));
+          const snapshot = await getDocs(q);
+  
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${data.productId || ""}</td>
+              <td>${data.name || ""}</td>
+              <td>${data.category || ""}</td>
+              <td>${data.cost || ""}</td>
+              <td>${data.weight || ""}</td>
+              <td>${data.calculatedPrice || ""}</td>
+              <td>${data.currency || ""}</td>
+              <td><button class="deleteBtn" data-id="${docSnap.id}">刪除</button></td>
+            `;
+            tableBody.appendChild(row);
+          });
+  
+          document.querySelectorAll(".deleteBtn").forEach(button => {
+            button.addEventListener("click", async function () {
+              const id = this.getAttribute("data-id");
+              await deleteDoc(doc(db, "quotations", id));
+              displayHistory();
+            });
+          });
+        });
+      }
+  
+      const form = document.getElementById("quoteForm");
+      if (form) {
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+  
+          const quote = {
+            productId: document.getElementById("productId").value,
+            name: document.getElementById("name").value,
+            category: document.getElementById("category").value,
+            cost: parseFloat(document.getElementById("cost").value),
+            weight: parseFloat(document.getElementById("weight").value),
+            calculatedPrice: parseFloat(document.getElementById("calculatedPrice").textContent),
+            currency: document.getElementById("currency").value,
+            timestamp: Date.now()
+          };
+  
+          await saveQuoteToFirestore(quote);
+          displayHistory();
+          form.reset();
+        });
+      }
+  
+      displayHistory();
+    });
+  </script>
+  
 </body>
 </html>
