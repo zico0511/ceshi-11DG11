@@ -4,9 +4,10 @@
   <meta charset="UTF-8" />
   <title>11DG11 庫存管理</title>
   <link rel="icon" href="favicon.png">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
-  
     body {
       font-family: 'Rubik', 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
@@ -14,7 +15,6 @@
       padding: 0;
       color: #333;
     }
-  
     .container {
       max-width: 1000px;
       margin: 60px auto;
@@ -23,15 +23,12 @@
       backdrop-filter: blur(20px);
       border-radius: 24px;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.4);
-      transition: all 0.3s ease-in-out;
       animation: fadeIn 0.6s ease;
     }
-  
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-  
     h1 {
       text-align: center;
       color: #ff4081;
@@ -40,54 +37,41 @@
       margin-bottom: 40px;
       text-shadow: 0 2px 6px rgba(255, 64, 129, 0.3);
     }
-  
     table {
       width: 100%;
       border-collapse: collapse;
       border-radius: 16px;
       overflow: hidden;
       background: #ffffffee;
-      box-shadow: 0 0 0 1px rgba(200, 200, 200, 0.2);
     }
-  
     th, td {
       padding: 16px;
       border-bottom: 1px solid #eaeaea;
       font-size: 0.95rem;
     }
-  
     th {
       background: linear-gradient(90deg, #ffe0f0 0%, #fce4ec 100%);
       color: #d81b60;
       font-weight: 600;
-      letter-spacing: 0.5px;
       text-transform: uppercase;
     }
-  
     td input, td select {
       padding: 8px 10px;
       border-radius: 12px;
       border: 1px solid #ccc;
-      outline: none;
       font-size: 0.9rem;
       background-color: #fdfdfd;
-      box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.04);
-      transition: all 0.2s ease;
     }
-  
     td input:focus, td select:focus {
       border-color: #ff80ab;
       box-shadow: 0 0 6px rgba(255, 128, 171, 0.5);
     }
-  
     td input[type="number"] {
       width: 80px;
     }
-  
     td input[type="text"] {
       width: 140px;
     }
-  
     .action-buttons button {
       margin: 0 6px;
       padding: 8px 16px;
@@ -95,30 +79,21 @@
       border-radius: 30px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
-  
     .save-btn {
       background: linear-gradient(145deg, #00c9a7, #00e5b2);
       color: white;
     }
-  
     .save-btn:hover {
       background: linear-gradient(145deg, #00bfa5, #00d1a0);
-      transform: translateY(-1px);
     }
-  
     .delete-btn {
       background: linear-gradient(145deg, #f44336, #e57373);
       color: white;
     }
-  
     .delete-btn:hover {
       background: linear-gradient(145deg, #d32f2f, #ef5350);
-      transform: translateY(-1px);
     }
-  
     .add-btn {
       display: block;
       margin: 30px auto 0;
@@ -130,15 +105,11 @@
       border-radius: 40px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 6px 16px rgba(255, 105, 135, 0.3);
-      transition: all 0.3s ease;
     }
-  
     .add-btn:hover {
       background: linear-gradient(to right, #ff4081, #f06292);
       transform: scale(1.05);
     }
-  
     .back-to-home-btn {
       position: fixed;
       top: 20px;
@@ -146,28 +117,16 @@
       background: linear-gradient(to right, #ec407a, #ab47bc);
       color: #fff;
       padding: 10px 20px;
-      font-size: 15px;
       font-weight: bold;
       text-decoration: none;
       border-radius: 40px;
-      box-shadow: 0 6px 12px rgba(171, 71, 188, 0.4);
-      z-index: 1000;
-      transition: all 0.3s ease;
-    }
-  
-    .back-to-home-btn:hover {
-      background: linear-gradient(to right, #d81b60, #8e24aa);
-      transform: scale(1.05);
     }
   </style>
-  
-  
 </head>
 <body>
   <div class="container">
     <h1>11DG11 庫存管理</h1>
-
-    <table id="productTable">
+    <table>
       <thead>
         <tr>
           <th>商品名稱</th>
@@ -178,76 +137,87 @@
       </thead>
       <tbody id="productList"></tbody>
     </table>
-
     <button class="add-btn" onclick="addProduct()">➕ 新增商品</button>
   </div>
-
   <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
 
   <script>
+    // Firebase 初始化（使用你提供的 firebaseConfig）
+    const firebaseConfig = {
+      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+      authDomain: "dg11-c954c.firebaseapp.com",
+      projectId: "dg11-c954c",
+      storageBucket: "dg11-c954c.firebasestorage.app",
+      messagingSenderId: "1010585577335",
+      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const collection = db.collection("products");
     const productList = document.getElementById("productList");
-    const STORAGE_KEY = "productsData";
 
-    function createRow(product = {}) {
+    function createRow(doc = null, data = {}) {
       const row = document.createElement("tr");
 
-      const nameTd = document.createElement("td");
       const nameInput = document.createElement("input");
       nameInput.type = "text";
-      nameInput.value = product.name || "";
-      nameTd.appendChild(nameInput);
+      nameInput.value = data.name || "";
 
-      const priceTd = document.createElement("td");
       const priceInput = document.createElement("input");
       priceInput.type = "number";
-      priceInput.value = product.price || "";
+      priceInput.value = data.price || "";
 
       const currencySelect = document.createElement("select");
-      const currencies = ["韓元", "台幣", "日元", "人民幣", "美元"];
-      currencies.forEach(cur => {
+      ["韓元", "台幣", "日元", "人民幣", "美元"].forEach(cur => {
         const option = document.createElement("option");
         option.value = cur;
         option.textContent = cur;
-        if (product.currency === cur) {
-          option.selected = true;
-        }
+        if (data.currency === cur) option.selected = true;
         currencySelect.appendChild(option);
       });
 
-      priceTd.appendChild(priceInput);
-      priceTd.appendChild(currencySelect);
-
-      const quantityTd = document.createElement("td");
       const quantityInput = document.createElement("input");
       quantityInput.type = "number";
-      quantityInput.value = product.quantity || "";
-      quantityTd.appendChild(quantityInput);
-
-      const actionsTd = document.createElement("td");
-      actionsTd.className = "action-buttons";
+      quantityInput.value = data.quantity || "";
 
       const saveBtn = document.createElement("button");
-      saveBtn.textContent = "保存";
       saveBtn.className = "save-btn";
-      saveBtn.onclick = () => {
-        saveToLocalStorage();
-        alert("✅ 商品已保存");
+      saveBtn.textContent = "保存";
+      saveBtn.onclick = async () => {
+        const product = {
+          name: nameInput.value.trim(),
+          price: parseFloat(priceInput.value) || 0,
+          currency: currencySelect.value,
+          quantity: parseInt(quantityInput.value) || 0
+        };
+        if (doc) {
+          await collection.doc(doc.id).set(product);
+        } else {
+          await collection.add(product);
+        }
+        alert("✅ 資料已保存");
+        loadData();
       };
 
       const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "刪除";
       deleteBtn.className = "delete-btn";
-      deleteBtn.onclick = () => {
+      deleteBtn.textContent = "刪除";
+      deleteBtn.onclick = async () => {
+        if (doc) await collection.doc(doc.id).delete();
         row.remove();
-        saveToLocalStorage();
       };
 
+      row.innerHTML = "";
+      row.appendChild(document.createElement("td")).appendChild(nameInput);
+      const priceTd = document.createElement("td");
+      priceTd.appendChild(priceInput);
+      priceTd.appendChild(currencySelect);
+      row.appendChild(priceTd);
+      row.appendChild(document.createElement("td")).appendChild(quantityInput);
+      const actionsTd = document.createElement("td");
+      actionsTd.className = "action-buttons";
       actionsTd.appendChild(saveBtn);
       actionsTd.appendChild(deleteBtn);
-
-      row.appendChild(nameTd);
-      row.appendChild(priceTd);
-      row.appendChild(quantityTd);
       row.appendChild(actionsTd);
 
       productList.appendChild(row);
@@ -257,30 +227,13 @@
       createRow();
     }
 
-    function saveToLocalStorage() {
-      const rows = productList.querySelectorAll("tr");
-      const products = [];
-      rows.forEach(row => {
-        const inputs = row.querySelectorAll("input");
-        const selects = row.querySelectorAll("select");
-        const name = inputs[0].value.trim();
-        const price = inputs[1].value.trim();
-        const currency = selects[0].value;
-        const quantity = inputs[2].value.trim();
-        if (name || price || quantity) {
-          products.push({ name, price, currency, quantity });
-        }
-      });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-    }
-
-    function loadFromLocalStorage() {
-      const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    async function loadData() {
+      const snapshot = await collection.get();
       productList.innerHTML = "";
-      data.forEach(product => createRow(product));
+      snapshot.forEach(doc => createRow(doc, doc.data()));
     }
 
-    window.onload = loadFromLocalStorage;
+    window.onload = loadData;
   </script>
 </body>
 </html>
