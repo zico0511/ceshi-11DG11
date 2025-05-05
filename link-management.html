@@ -18,6 +18,7 @@
       background: linear-gradient(to right, #ffe0ec, #ffeaf3);
       color: #333;
       padding: 40px 20px;
+      min-height: 100vh;
       animation: fadeIn 1.2s ease-out both;
     }
 
@@ -86,7 +87,6 @@
       cursor: pointer;
       transition: 0.3s ease;
       box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3);
-      animation: popIn 0.6s ease-out;
     }
 
     .button:hover {
@@ -94,41 +94,30 @@
       transform: translateY(-2px) scale(1.02);
     }
 
-    @keyframes popIn {
-      0% { transform: scale(0.95); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
       background: #fffafc;
       border-radius: 12px;
+      overflow: hidden;
       box-shadow: 0 4px 20px rgba(255, 182, 193, 0.15);
-      animation: fadeInTable 1.2s ease;
-    }
-
-    @keyframes fadeInTable {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+      margin-top: 20px;
     }
 
     th, td {
       padding: 14px 18px;
       text-align: left;
+      border-bottom: 1px solid #ffd6e7;
     }
 
-    thead {
+    th {
       background-color: #ffe0ec;
-    }
-
-    tbody tr:nth-child(even) {
-      background-color: #fff3f8;
+      color: #e84393;
+      font-weight: 600;
     }
 
     tbody tr:hover {
       background-color: #ffe9f2;
-      transition: background 0.3s ease;
     }
 
     .action-btn {
@@ -156,30 +145,15 @@
       font-size: 16px;
       font-weight: 600;
       text-decoration: none;
-      border: none;
       border-radius: 30px;
       box-shadow: 0 8px 20px rgba(255, 105, 180, 0.35);
       z-index: 1000;
       transition: all 0.3s ease;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      animation: slideInBtn 0.8s ease;
-    }
-
-    @keyframes slideInBtn {
-      from { transform: translateX(100px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
     }
 
     .back-to-home-btn:hover {
-      background: linear-gradient(135deg, #ffa8d4, #ff72b2);
+      transform: translateY(-3px);
       box-shadow: 0 12px 24px rgba(255, 105, 180, 0.5);
-      transform: translateY(-3px) scale(1.06);
-    }
-
-    .back-to-home-btn:active {
-      transform: scale(0.98);
-      box-shadow: 0 6px 14px rgba(255, 105, 180, 0.4);
     }
 
     hr {
@@ -188,64 +162,58 @@
       border-top: 1px solid #ffd6e7;
     }
 
-    .fade-in-row {
-  animation: fadeInRow 0.5s ease forwards;
-}
-@keyframes fadeInRow {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-out-row {
-  animation: fadeOutRow 0.4s ease forwards;
-}
-@keyframes fadeOutRow {
-  from { opacity: 1; height: auto; }
-  to { opacity: 0; height: 0; transform: scaleY(0); }
-}
-
-.toast {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%) translateY(30px);
-  background: #ff92c2;
-  color: white;
-  padding: 14px 24px;
-  border-radius: 24px;
-  font-weight: 600;
-  opacity: 0;
-  transition: all 0.4s ease;
-  z-index: 9999;
-  box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
-}
-
-.toast.toast-success {
-  background: #ff6fae;
-}
-
-.toast.toast-error {
-  background: #e74c3c;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
+    /* 新增動畫效果 */
+    .fade-in {
+      animation: fadeInRow 0.5s ease forwards;
+    }
+    @keyframes fadeInRow {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+       /* 新增表格樣式修正 */
+       table {
+      table-layout: fixed; /* 固定表格佈局 */
+      width: 100%;
+    }
+    
+    /* 設定各欄位寬度 */
+    th:nth-child(1), td:nth-child(1) {
+      width: 20%; /* 網址名稱欄位 */
+    }
+    
+    th:nth-child(2), td:nth-child(2) {
+      width: 65%; /* 網址欄位 */
+      word-break: break-all; /* 強制換行 */
+      overflow-wrap: break-word; /* 長單字換行 */
+    }
+    
+    th:nth-child(3), td:nth-child(3) {
+      width: 15%; /* 操作欄位 */
+    }
+    
+    /* 網址連結樣式 */
+    td a {
+      color: #1a73e8; /* Google藍色 */
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    td a:hover {
+      color: #0d5bca; /* 深藍色 */
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>網址連結管理</h1>
 
-    <!-- 新增網址表單 -->
     <form id="linkForm">
       <label for="linkName">網址名稱：</label>
-      <input type="text" id="linkName" required placeholder="輸入網址名稱" />
+      <input type="text" id="linkName" required placeholder="輸入網址名稱">
 
       <label for="url">網址：</label>
-      <input type="url" id="url" required placeholder="輸入網址" />
+      <input type="url" id="url" required placeholder="輸入完整網址（包含http://或https://）">
 
       <button type="submit" class="button">新增網址</button>
     </form>
@@ -262,61 +230,79 @@
         </tr>
       </thead>
       <tbody id="linkItems">
-        <!-- 網址列表 -->
+        <!-- 網址列表將由JavaScript動態生成 -->
       </tbody>
     </table>
   </div>
 
-  <a href="home.html" class="back-to-home-btn" title="返回主頁">🏠 返回主頁</a>
-  <script src="link-management.js"></script>
+  <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
-        authDomain: "dg11-c954c.firebaseapp.com",
-        projectId: "dg11-c954c"
-      };
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
-    </script>
-  
-    <script>
-      const form = document.getElementById("linkForm");
-      const linkItems = document.getElementById("linkItems");
-  
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const name = document.getElementById("linkName").value.trim();
-        const url = document.getElementById("url").value.trim();
-        const operator = localStorage.getItem("loggedInUser") || "guest";
-  
-        if (!name || !url) return;
-  
+  <script>
+    // 初始化Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+      authDomain: "dg11-c954c.firebaseapp.com",
+      projectId: "dg11-c954c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // 取得DOM元素
+    const form = document.getElementById("linkForm");
+    const linkItems = document.getElementById("linkItems");
+
+    // 表單提交處理
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById("linkName").value.trim();
+      const url = document.getElementById("url").value.trim();
+      const operator = localStorage.getItem("loggedInUser") || "guest";
+
+      if (!name || !url) {
+        alert("請填寫完整資訊！");
+        return;
+      }
+
+      try {
+        // 新增資料到Firestore
         await db.collection("links").add({
           title: name,
           url: url,
           operator: operator,
           time: new Date()
         });
-  
+        
+        // 清空表單
         form.reset();
-      });
-  
-      function deleteLink(id) {
-        if (confirm("確定要刪除這筆網址嗎？")) {
-          db.collection("links").doc(id).delete();
-        }
+      } catch (error) {
+        console.error("新增資料失敗:", error);
+        alert("新增失敗，請稍後再試");
       }
-  
-      db.collection("links").orderBy("time", "desc").onSnapshot(snapshot => {
+    });
+
+    // 刪除連結
+    function deleteLink(id) {
+      if (confirm("確定要刪除這個網址嗎？")) {
+        db.collection("links").doc(id).delete()
+          .catch(error => console.error("刪除失敗:", error));
+      }
+    }
+
+    // 即時監聽資料變化
+    db.collection("links")
+      .orderBy("time", "desc")
+      .onSnapshot((snapshot) => {
         linkItems.innerHTML = "";
-        snapshot.forEach(doc => {
+        
+        snapshot.forEach((doc) => {
           const data = doc.data();
           const row = document.createElement("tr");
+          row.className = "fade-in";
           row.innerHTML = `
             <td>${data.title}</td>
             <td><a href="${data.url}" target="_blank">${data.url}</a></td>
@@ -324,8 +310,38 @@
           `;
           linkItems.appendChild(row);
         });
+      }, (error) => {
+        console.error("資料讀取失敗:", error);
       });
-    </script>
-    
+  </script>
+  <script>
+    // 修改表格行生成代碼，添加網址縮短顯示
+    db.collection("links")
+      .orderBy("time", "desc")
+      .onSnapshot((snapshot) => {
+        linkItems.innerHTML = "";
+        
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const row = document.createElement("tr");
+          row.className = "fade-in";
+          
+          // 縮短過長網址顯示
+          let displayUrl = data.url;
+          if (data.url.length > 50) {
+            displayUrl = data.url.substring(0, 30) + "...";
+          }
+          
+          row.innerHTML = `
+            <td>${data.title}</td>
+            <td>
+              <a href="${data.url}" target="_blank" title="${data.url}">${displayUrl}</a>
+            </td>
+            <td><button class="action-btn" onclick="deleteLink('${doc.id}')">刪除</button></td>
+          `;
+          linkItems.appendChild(row);
+        });
+      });
+  </script>
 </body>
 </html>
