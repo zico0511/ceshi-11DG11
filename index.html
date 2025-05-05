@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>登入 - 11DG11</title>
+  <link rel="icon" href="favicon.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+  
+    @keyframes fadeInZoom {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+  
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #fff0f5, #ffd6e8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+  
+    .container {
+      backdrop-filter: blur(14px) saturate(150%);
+      -webkit-backdrop-filter: blur(14px) saturate(150%);
+      background-color: rgba(255, 255, 255, 0.65);
+      padding: 2.5rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 15px 35px rgba(255, 105, 180, 0.25);
+      width: 440px;
+      animation: fadeInZoom 0.8s ease-out;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 182, 193, 0.3);
+    }
+  
+    h1 {
+      text-align: center;
+      color: #ff4da6;
+      font-size: 2rem;
+      margin-bottom: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+  
+    input, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.6rem 0;
+      border-radius: 0.75rem;
+      border: 1px solid #ffb3d9;
+      font-size: 1rem;
+      transition: all 0.2s ease-in-out;
+      font-weight: 500;
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+  
+    input:focus {
+      border-color: #ff80bf;
+      outline: none;
+      box-shadow: 0 0 8px rgba(255, 105, 180, 0.2);
+    }
+  
+    button {
+      background: linear-gradient(90deg, #ff66a3, #ff85b3);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+    }
+  
+    button:hover {
+      background: linear-gradient(90deg, #e05590, #ff6fa8);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 105, 180, 0.35);
+    }
+  
+    .link-button {
+      background: none;
+      color: #ff66a3;
+      text-align: center;
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+  
+    .link-button:hover {
+      color: #e05590;
+      text-decoration: underline;
+    }
+  </style>
+  
+</head>
+<body>
+  <div class="container">
+    <h1>登入</h1>
+    <form id="loginForm">
+      <label for="loginUsername">用戶名：</label>
+      <input type="text" id="loginUsername" required placeholder="輸入用戶名" />
+
+      <label for="loginPassword">密碼：</label>
+      <input type="password" id="loginPassword" required placeholder="輸入密碼" />
+
+      <button type="submit">登入</button>
+    </form>
+    
+    <p style="text-align: center;">還沒有帳號？<a href="register.html" class="link-button">立即註冊</a></p>
+  </div>
+
+  <script>
+    // 登入表單提交事件
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+
+      // 從 localStorage 讀取已註冊的用戶
+      let users = JSON.parse(localStorage.getItem('users')) || [];
+      
+      const user = users.find(u => u.username === username && u.password === password);
+
+      if (user) {
+        localStorage.setItem('loggedInUser', user.username);  // 儲存登入的用戶ID
+        alert('登入成功！');
+        window.location.href = 'home.html'; // 登入成功後跳轉到主頁
+      } else {
+        alert('帳號或密碼錯誤！');
+      }
+    });
+  </script>
+</body>
+</html>

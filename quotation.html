@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11DG11 報價系統</title>
+    <link rel="icon" href="favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff69b4;
+            --primary-dark: #e055a3;
+            --secondary-color: #ffe4ec;
+            --accent-color: #ffb6c1;
+            --background-color: #fff0f5;
+            --text-color: #4b2e2e;
+            --card-radius: 16px;
+            --shadow: 0 8px 20px rgba(255, 105, 180, 0.15);
+        }
+        
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://cdn-icons-png.flaticon.com/512/833/833472.png');
+            background-repeat: repeat;
+            background-size: 30px;
+            opacity: 0.05;
+            animation: bgFloat 30s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgFloat {
+            from { background-position: 0 0; }
+            to { background-position: 1000px 1000px; }
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 3px rgba(255, 105, 180, 0.2);
+        }
+        
+        .card {
+            border-radius: var(--card-radius);
+            background-color: #ffffff;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            transform-origin: top;
+            animation: foldOpen 0.6s ease forwards, fadeInUp 0.5s ease forwards;
+        }
+        
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 30px rgba(255, 105, 180, 0.3);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #ff69b4, #ffc0cb);
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            border-radius: var(--card-radius) var(--card-radius) 0 0;
+            padding: 16px;
+            box-shadow: 0 4px 6px rgba(255, 105, 180, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ff69b4, #ffa6c9);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 10px 24px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(255, 105, 180, 0.5);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #ffc0cb;
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(255, 105, 180, 0.25);
+        }
+        
+        .preview-image {
+            max-width: 240px;
+            max-height: 240px;
+            margin-top: 15px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: none;
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        .result-container {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        .result-card {
+            background-color: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            animation: foldOpen 0.5s ease;
+        }
+        
+        .result-card:hover {
+            transform: scale(1.01);
+            box-shadow: 0 10px 24px rgba(255, 105, 180, 0.25);
+        }
+        
+        .result-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .tab-content {
+            padding: 20px;
+            animation: slideIn 0.6s ease forwards;
+        }
+        
+        .nav-tabs {
+            border-bottom: none;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 20px;
+            margin-left: 10px;
+            padding: 8px 20px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #ffe0f0, #ffd1e5);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(255, 105, 180, 0.2);
+        }
+        
+        .nav-tabs .nav-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #ff69b4, #ffa6c9);
+            color: white;
+            box-shadow: 0 6px 18px rgba(255, 105, 180, 0.4);
+        }
+        
+        .history-item {
+            border-left: 5px solid var(--primary-color);
+            padding: 16px;
+            background-color: #fff;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            animation: fadeInUp 0.5s ease both;
+        }
+        
+        .currency-link {
+            color: var(--primary-color);
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        .currency-link:hover {
+            text-decoration: underline;
+        }
+        
+        #previewResult {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .clear-history {
+            margin-top: 24px;
+            text-align: right;
+        }
+        
+        /* ✨ 導覽連結樣式（右上角） */
+        .navbar-nav a {
+            padding: 6px 16px;
+            margin-left: 8px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #ffe0f0, #ffd1e5);
+            font-weight: 600;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(255, 105, 180, 0.2);
+            text-decoration: none;
+        }
+        
+        .navbar-nav a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(255, 105, 180, 0.3);
+        }
+        
+        .navbar-nav a.active {
+            background: linear-gradient(135deg, #ff69b4, #ffa6c9);
+            color: white;
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes foldOpen {
+            0% { transform: rotateX(-90deg); opacity: 0; }
+            100% { transform: rotateX(0deg); opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .return-home-btn {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    background: linear-gradient(to right, #ff85b3, #ffa6c1);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 14px;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    z-index: 9999;
+}
+
+.return-home-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 14px rgba(255, 105, 180, 0.4);
+    background: linear-gradient(to right, #ff5e9c, #ff87b8);
+}
+        </style>
+        
+    
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-calculator me-2"></i>11DG11 報價系統
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="quotation-tab">報價計算</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="history-tab">歷史記錄</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- 匯率查詢連結 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        匯率查詢
+                    </div>
+                    <div class="card-body">
+                        <a href="https://www.google.com/search?q=%E5%8F%B0%E5%B9%A3%E9%9F%93%E5%85%83%E5%8C%AF%E7%8E%87&rlz=1C1CHBF_zh-TWTW1088TW1088&oq=&gs_lcrp=EgZjaHJvbWUqCQgAECMYJxjqAjIJCAAQIxgnGOoCMgkIARAjGCcY6gIyCQgCECMYJxjqAjIJCAMQIxgnGOoCMgkIBBAjGCcY6gIyCQgFEC4YJxjqAjIJCAYQIxgnGOoCMgkIBxAjGCcY6gLSAQg0MzcxajBqN6gCCLACAfEFJEEPcz8wgwvxBSRBD3M_MIML&sourceid=chrome&ie=UTF-8" target="_blank" class="btn btn-outline-primary currency-link">
+                            <i class="fas fa-exchange-alt me-1"></i> XE 匯率查詢
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 主表單 -->
+                <div class="card mb-4" id="quotation-section">
+                    <div class="card-header">
+                        商品報價計算
+                    </div>
+                    <div class="card-body">
+                        <form id="quotationForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="productImage" class="form-label">商品圖片</label>
+                                    <input class="form-control" type="file" id="productImage" accept="image/*">
+                                    <img id="imagePreview" class="preview-image mt-2" alt="圖片預覽">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="productId" class="form-label">商品編號</label>
+                                    <input type="text" class="form-control" id="productId" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label for="productName" class="form-label">商品名稱</label>
+                                    <input type="text" class="form-control" id="productName" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="productCategory" class="form-label">商品類別</label>
+                                    <select class="form-select" id="productCategory" required>
+                                        <option value="">選擇類別</option>
+                                        <option value="衣服">衣服</option>
+                                        <option value="褲子">褲子</option>
+                                        <option value="帽子">帽子</option>
+                                        <option value="鞋子">鞋子</option>
+                                        <option value="襪子">襪子</option>
+                                        <option value="食品">食品</option>
+                                        <option value="美妝">美妝</option>
+                                        <option value="娃娃">娃娃</option>
+                                        <option value="吊飾">吊飾</option>
+                                        <option value="保養品">保養品</option>
+                                        <option value="其他">其他</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="productCost" class="form-label">商品成本</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="productCost" step="0.01" required>
+                                        <select class="form-select" id="costCurrency" style="max-width: 120px;">
+                                            <option value="KRW">韓元 (KRW)</option>
+                                            <option value="JPY">日元 (JPY)</option>
+                                            <option value="USD">美元 (USD)</option>
+                                            <option value="CNY">人民幣 (CNY)</option>
+                                            <option value="TWD">新台幣 (TWD)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="productWeight" class="form-label">商品重量</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="productWeight" step="0.01" required>
+                                        <select class="form-select" id="weightUnit" style="max-width: 100px;">
+                                            <option value="g">公克 (g)</option>
+                                            <option value="kg">公斤 (kg)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="internationalShipping" class="form-label">國際運費 (每單位新台幣)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">NT$</span>
+                                        <input type="number" class="form-control" id="internationalShipping" step="0.01" required>
+                                        <span class="input-group-text" id="shippingUnitLabel">/g</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="serviceFeePercent" class="form-label">代付百分比</label>
+                                    <select class="form-select" id="serviceFeePercent" required>
+                                        <option value="0.01">1%</option>
+                                        <option value="0.02">2%</option>
+                                        <option value="0.03">3%</option>
+                                        <option value="0.04">4%</option>
+                                        <option value="0.05">5%</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="additionalServiceFee" class="form-label">額外服務費 (新台幣)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">NT$</span>
+                                    <input type="number" class="form-control" id="additionalServiceFee" step="0.01" value="0">
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-calculator me-2"></i>計算報價
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="result-container mt-4" id="resultContainer">
+                            <div class="result-card">
+                                <h5 class="text-center mb-3">報價結果</h5>
+                                <div class="text-center mb-3">
+                                    <img id="resultImagePreview" class="result-image" alt="商品圖片">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>商品編號:</strong> <span id="resultProductId"></span></p>
+                                        <p><strong>商品名稱:</strong> <span id="resultProductName"></span></p>
+                                        <p><strong>商品類別:</strong> <span id="resultProductCategory"></span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>商品成本:</strong> <span id="resultProductCost"></span></p>
+                                        <p><strong>商品重量:</strong> <span id="resultProductWeight"></span></p>
+                                        <p><strong>國際運費:</strong> <span id="resultShippingFee"></span></p>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="text-center">
+                                    <h4 class="text-primary">總報價: <span id="resultTotalPrice"></span></h4>
+                                    <p class="text-muted"><small>計算時間: <span id="calculationTime"></span></small></p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-center gap-3 mt-4">
+                                <button id="downloadResultBtn" class="btn btn-success">
+                                    <i class="fas fa-download me-2"></i>下載報價單
+                                </button>
+                                <button id="saveRecordBtn" class="btn btn-outline-primary">
+                                    <i class="fas fa-save me-2"></i>儲存記錄
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 歷史記錄 -->
+                <div class="card" id="history-section" style="display: none;">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>歷史報價記錄</span>
+                        <div class="input-group" style="max-width: 300px;">
+                            <input type="text" class="form-control" id="historySearch" placeholder="搜尋商品編號或名稱">
+                            <button class="btn btn-outline-secondary" type="button" id="searchHistoryBtn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="historyList">
+                            <p class="text-muted text-center">沒有歷史記錄</p>
+                        </div>
+                        <div class="text-center clear-history">
+                            <button id="clearAllHistoryBtn" class="btn btn-outline-danger">
+                                <i class="fas fa-trash-alt me-2"></i>清除所有記錄
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 切換分頁
+            document.getElementById('quotation-tab').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('quotation-section').style.display = 'block';
+                document.getElementById('history-section').style.display = 'none';
+                this.classList.add('active');
+                document.getElementById('history-tab').classList.remove('active');
+            });
+            
+            document.getElementById('history-tab').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('quotation-section').style.display = 'none';
+                document.getElementById('history-section').style.display = 'block';
+                this.classList.add('active');
+                document.getElementById('quotation-tab').classList.remove('active');
+                loadHistory();
+            });
+
+            // 圖片預覽
+            document.getElementById('productImage').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const preview = document.getElementById('imagePreview');
+                        preview.src = event.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // 重量單位變化時更新國際運費標籤
+            document.getElementById('weightUnit').addEventListener('change', function() {
+                const unit = this.value;
+                document.getElementById('shippingUnitLabel').textContent = `/${unit}`;
+            });
+
+            // 表單提交
+            document.getElementById('quotationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                calculateQuotation();
+            });
+
+            // 搜尋歷史記錄
+            document.getElementById('searchHistoryBtn').addEventListener('click', function() {
+                searchHistory();
+            });
+
+            document.getElementById('historySearch').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchHistory();
+                }
+            });
+
+            // 清除所有歷史記錄
+            document.getElementById('clearAllHistoryBtn').addEventListener('click', function() {
+                if (confirm('確定要清除所有歷史記錄嗎？此操作無法復原！')) {
+                    localStorage.removeItem('quotationHistory');
+                    loadHistory();
+                }
+            });
+
+            // 載入歷史記錄
+            function loadHistory() {
+                const history = JSON.parse(localStorage.getItem('quotationHistory')) || [];
+                displayHistory(history);
+            }
+
+            // 顯示歷史記錄
+            function displayHistory(history) {
+                const historyList = document.getElementById('historyList');
+                
+                if (history.length === 0) {
+                    historyList.innerHTML = '<p class="text-muted text-center">沒有歷史記錄</p>';
+                    return;
+                }
+                
+                historyList.innerHTML = '';
+                
+                history.forEach((item, index) => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6>${item.productName} <span class="badge bg-secondary">${item.productCategory}</span></h6>
+                                <p class="mb-1"><small>編號: ${item.productId} | 成本: ${item.productCost} ${item.costCurrency} | 重量: ${item.productWeight}${item.weightUnit}</small></p>
+                                <p class="mb-1"><small>國際運費: NT$${item.internationalShipping}/${item.weightUnit} | 代付: ${parseFloat(item.serviceFeePercent) * 100}%</small></p>
+                            </div>
+                            <div class="text-end">
+                                <h5 class="text-primary">NT$${parseFloat(item.totalPrice).toFixed(2)}</h5>
+                                <p class="text-muted mb-0"><small>${new Date(item.timestamp).toLocaleString()}</small></p>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-secondary view-detail-btn" data-index="${index}">
+                                <i class="fas fa-eye me-1"></i>查看詳情
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-record-btn" data-index="${index}">
+                                <i class="fas fa-trash me-1"></i>刪除
+                            </button>
+                        </div>
+                    `;
+                    historyList.appendChild(historyItem);
+                });
+
+                // 添加查看詳情按鈕事件
+                document.querySelectorAll('.view-detail-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const history = JSON.parse(localStorage.getItem('quotationHistory')) || [];
+                        if (index >= 0 && index < history.length) {
+                            showQuotationDetail(history[index]);
+                        }
+                    });
+                });
+
+                // 添加刪除按鈕事件
+                document.querySelectorAll('.delete-record-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const history = JSON.parse(localStorage.getItem('quotationHistory')) || [];
+                        if (index >= 0 && index < history.length) {
+                            if (confirm('確定要刪除此記錄嗎？')) {
+                                history.splice(index, 1);
+                                localStorage.setItem('quotationHistory', JSON.stringify(history));
+                                loadHistory();
+                            }
+                        }
+                    });
+                });
+            }
+
+            // 搜尋歷史記錄
+            function searchHistory() {
+                const searchTerm = document.getElementById('historySearch').value.toLowerCase();
+                const history = JSON.parse(localStorage.getItem('quotationHistory')) || [];
+                
+                if (searchTerm.trim() === '') {
+                    displayHistory(history);
+                    return;
+                }
+                
+                const filteredHistory = history.filter(item => 
+                    item.productId.toLowerCase().includes(searchTerm) || 
+                    item.productName.toLowerCase().includes(searchTerm)
+                );
+                
+                displayHistory(filteredHistory);
+            }
+
+            // 顯示報價詳情
+            function showQuotationDetail(detail) {
+                // 填充表單
+                document.getElementById('productId').value = detail.productId;
+                document.getElementById('productName').value = detail.productName;
+                document.getElementById('productCategory').value = detail.productCategory;
+                document.getElementById('productCost').value = detail.originalCost;
+                document.getElementById('costCurrency').value = detail.costCurrency;
+                document.getElementById('productWeight').value = detail.originalWeight;
+                document.getElementById('weightUnit').value = detail.weightUnit;
+                document.getElementById('internationalShipping').value = detail.internationalShipping;
+                document.getElementById('serviceFeePercent').value = detail.serviceFeePercent;
+                document.getElementById('additionalServiceFee').value = detail.additionalServiceFee;
+                
+                // 更新運費單位標籤
+                document.getElementById('shippingUnitLabel').textContent = `/${detail.weightUnit}`;
+                
+                // 如果有圖片，顯示預覽
+                if (detail.imageData) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = detail.imageData;
+                    preview.style.display = 'block';
+                }
+                
+                // 顯示結果
+                displayResult(detail);
+                
+                // 切換到報價分頁
+                document.getElementById('quotation-section').style.display = 'block';
+                document.getElementById('history-section').style.display = 'none';
+                document.getElementById('quotation-tab').classList.add('active');
+                document.getElementById('history-tab').classList.remove('active');
+            }
+
+            // 計算報價
+            function calculateQuotation() {
+                // 獲取表單值
+                const productId = document.getElementById('productId').value;
+                const productName = document.getElementById('productName').value;
+                const productCategory = document.getElementById('productCategory').value;
+                const productCost = parseFloat(document.getElementById('productCost').value);
+                const costCurrency = document.getElementById('costCurrency').value;
+                const productWeight = parseFloat(document.getElementById('productWeight').value);
+                const weightUnit = document.getElementById('weightUnit').value;
+                const internationalShipping = parseFloat(document.getElementById('internationalShipping').value);
+                const serviceFeePercent = document.getElementById('serviceFeePercent').value;
+                const additionalServiceFee = parseFloat(document.getElementById('additionalServiceFee').value) || 0;
+                
+                // 驗證輸入
+                if (!productId || !productName || !productCategory || isNaN(productCost) || isNaN(productWeight) || isNaN(internationalShipping)) {
+                    alert('請填寫所有必填欄位');
+                    return;
+                }
+                
+                // 匯率設定 (這裡使用固定韓幣匯率42，其他貨幣假設匯率)
+                const exchangeRates = {
+                    KRW: 42,    // 1 KRW = 42 TWD (示例，實際應使用即時匯率)
+                    JPY: 0.28,    // 1 JPY = 0.28 TWD
+                    USD: 30.5,    // 1 USD = 30.5 TWD
+                    CNY: 4.3,     // 1 CNY = 4.3 TWD
+                    TWD: 1        // 1 TWD = 1 TWD
+                };
+                
+                // 計算轉換為韓幣的成本
+                const costInKRW = productCost * exchangeRates[costCurrency] / exchangeRates['KRW'];
+                
+                // 計算重量 (統一轉換為克)
+                const weightInG = weightUnit === 'kg' ? productWeight * 1000 : productWeight;
+                
+                // 計算國際運費 (根據重量單位)
+                const shippingCostPerG = weightUnit === 'kg' ? internationalShipping / 1000 : internationalShipping;
+                const totalShippingCost = weightInG * shippingCostPerG;
+                
+                // 計算總成本 (保留完整小數位)
+                const totalCost = (costInKRW * (1 + parseFloat(serviceFeePercent)) / 42) + totalShippingCost + additionalServiceFee;
+                
+                // 獲取圖片數據
+                const imageFile = document.getElementById('productImage').files[0];
+                let imageData = null;
+                
+                if (imageFile) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        imageData = event.target.result;
+                        // 準備結果對象
+                        const result = {
+                            productId,
+                            productName,
+                            productCategory,
+                            originalCost: productCost,
+                            costCurrency,
+                            originalWeight: productWeight,
+                            weightUnit,
+                            internationalShipping,
+                            serviceFeePercent,
+                            additionalServiceFee,
+                            totalPrice: totalCost.toFixed(2),
+                            rawTotal: totalCost,
+                            timestamp: new Date().toISOString(),
+                            imageData
+                        };
+                        
+                        // 顯示結果
+                        displayResult(result);
+                    };
+                    reader.readAsDataURL(imageFile);
+                } else {
+                    // 準備結果對象 (無圖片)
+                    const result = {
+                        productId,
+                        productName,
+                        productCategory,
+                        originalCost: productCost,
+                        costCurrency,
+                        originalWeight: productWeight,
+                        weightUnit,
+                        internationalShipping,
+                        serviceFeePercent,
+                        additionalServiceFee,
+                        totalPrice: totalCost.toFixed(2),
+                        rawTotal: totalCost,
+                        timestamp: new Date().toISOString(),
+                        imageData: null
+                    };
+                    
+                    // 顯示結果
+                    displayResult(result);
+                }
+            }
+            
+            // 顯示結果
+            function displayResult(result) {
+                // 填充結果區域
+                document.getElementById('resultProductId').textContent = result.productId;
+                document.getElementById('resultProductName').textContent = result.productName;
+                document.getElementById('resultProductCategory').textContent = result.productCategory;
+                document.getElementById('resultProductCost').textContent = `${result.originalCost} ${result.costCurrency}`;
+                document.getElementById('resultProductWeight').textContent = `${result.originalWeight} ${result.weightUnit}`;
+                document.getElementById('resultShippingFee').textContent = `NT$${result.internationalShipping}/${result.weightUnit}`;
+                document.getElementById('resultTotalPrice').textContent = `NT$${result.totalPrice}`;
+                document.getElementById('calculationTime').textContent = new Date(result.timestamp).toLocaleString();
+                
+                // 顯示圖片
+                const resultImage = document.getElementById('resultImagePreview');
+                if (result.imageData) {
+                    resultImage.src = result.imageData;
+                    resultImage.style.display = 'block';
+                } else {
+                    resultImage.style.display = 'none';
+                }
+                
+                // 顯示結果容器
+                document.getElementById('resultContainer').style.display = 'block';
+                
+                // 添加保存按鈕事件
+                document.getElementById('saveRecordBtn').onclick = function() {
+                    saveQuotation(result);
+                };
+                
+                // 添加下載按鈕事件
+                document.getElementById('downloadResultBtn').onclick = function() {
+                    downloadQuotation(result);
+                };
+                
+                // 滾動到結果
+                document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // 保存報價記錄
+            function saveQuotation(quotation) {
+                let history = JSON.parse(localStorage.getItem('quotationHistory')) || [];
+                
+                // 檢查是否已存在相同ID的記錄
+                const existingIndex = history.findIndex(item => item.productId === quotation.productId);
+                
+                if (existingIndex >= 0) {
+                    // 更新現有記錄
+                    history[existingIndex] = quotation;
+                } else {
+                    // 添加新記錄
+                    history.unshift(quotation); // 添加到開頭
+                }
+                
+                // 保存到本地存儲
+                localStorage.setItem('quotationHistory', JSON.stringify(history));
+                
+                alert('報價記錄已保存');
+            }
+            
+            // 下載報價單
+            function downloadQuotation(quotation) {
+                const resultCard = document.querySelector('.result-card');
+                
+                html2canvas(resultCard).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `報價單_${quotation.productId}_${new Date().toISOString().slice(0, 10)}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            }
+        });
+        
+    </script>
+    <a href="home.html" class="return-home-btn">🏠 返回主頁</a>
+</body>
+</html>

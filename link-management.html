@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>11DG11 - 網址連結管理</title>
+  <link rel="icon" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Noto Sans TC', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(to right, #ffe0ec, #ffeaf3);
+      color: #333;
+      padding: 40px 20px;
+      animation: fadeIn 1.2s ease-out both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 12px 40px rgba(255, 105, 180, 0.15);
+      animation: slideUp 0.8s ease-out both;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    h1, h2 {
+      color: #e84393;
+      margin-bottom: 20px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    form {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    label {
+      font-weight: 600;
+      color: #d63076;
+    }
+
+    input[type="text"],
+    input[type="url"] {
+      padding: 12px;
+      border: 1.5px solid #f8bad4;
+      border-radius: 12px;
+      font-size: 16px;
+      background-color: #fff0f6;
+      transition: 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #ff5fa2;
+      outline: none;
+      background-color: #ffe9f2;
+    }
+
+    .button {
+      background: linear-gradient(135deg, #ff6fae, #ff92c2);
+      color: white;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3);
+      animation: popIn 0.6s ease-out;
+    }
+
+    .button:hover {
+      background: linear-gradient(135deg, #ff84bc, #ffa1d0);
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fffafc;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(255, 182, 193, 0.15);
+      animation: fadeInTable 1.2s ease;
+    }
+
+    @keyframes fadeInTable {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    th, td {
+      padding: 14px 18px;
+      text-align: left;
+    }
+
+    thead {
+      background-color: #ffe0ec;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #fff3f8;
+    }
+
+    tbody tr:hover {
+      background-color: #ffe9f2;
+      transition: background 0.3s ease;
+    }
+
+    .action-btn {
+      background: #ff6b9e;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .action-btn:hover {
+      background: #e7518c;
+    }
+
+    .back-to-home-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #ff8ec7, #ff5fa2);
+      color: #fff;
+      padding: 12px 22px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      border-radius: 30px;
+      box-shadow: 0 8px 20px rgba(255, 105, 180, 0.35);
+      z-index: 1000;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      animation: slideInBtn 0.8s ease;
+    }
+
+    @keyframes slideInBtn {
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .back-to-home-btn:hover {
+      background: linear-gradient(135deg, #ffa8d4, #ff72b2);
+      box-shadow: 0 12px 24px rgba(255, 105, 180, 0.5);
+      transform: translateY(-3px) scale(1.06);
+    }
+
+    .back-to-home-btn:active {
+      transform: scale(0.98);
+      box-shadow: 0 6px 14px rgba(255, 105, 180, 0.4);
+    }
+
+    hr {
+      margin: 30px 0;
+      border: none;
+      border-top: 1px solid #ffd6e7;
+    }
+
+    .fade-in-row {
+  animation: fadeInRow 0.5s ease forwards;
+}
+@keyframes fadeInRow {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-out-row {
+  animation: fadeOutRow 0.4s ease forwards;
+}
+@keyframes fadeOutRow {
+  from { opacity: 1; height: auto; }
+  to { opacity: 0; height: 0; transform: scaleY(0); }
+}
+
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(30px);
+  background: #ff92c2;
+  color: white;
+  padding: 14px 24px;
+  border-radius: 24px;
+  font-weight: 600;
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+}
+
+.toast.toast-success {
+  background: #ff6fae;
+}
+
+.toast.toast-error {
+  background: #e74c3c;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>網址連結管理</h1>
+
+    <!-- 新增網址表單 -->
+    <form id="linkForm">
+      <label for="linkName">網址名稱：</label>
+      <input type="text" id="linkName" required placeholder="輸入網址名稱" />
+
+      <label for="url">網址：</label>
+      <input type="url" id="url" required placeholder="輸入網址" />
+
+      <button type="submit" class="button">新增網址</button>
+    </form>
+
+    <hr>
+
+    <h2>保存的網址</h2>
+    <table id="linkTable">
+      <thead>
+        <tr>
+          <th>網址名稱</th>
+          <th>網址</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="linkItems">
+        <!-- 網址列表 -->
+      </tbody>
+    </table>
+  </div>
+
+  <a href="home.html" class="back-to-home-btn" title="返回主頁">🏠 返回主頁</a>
+  <script src="link-management.js"></script>
+</body>
+</html>

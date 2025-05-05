@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>11DG11 訂單管理</title>
+  <link rel="icon" href="favicon.png">
+  <style>
+    :root {
+      --primary: #d63384;
+      --primary-light: #fce4ef;
+      --bg: #fff0f6;
+      --text: #333;
+      --card-bg: #ffffff;
+      --border-radius: 16px;
+      --shadow: 0 10px 30px rgba(214, 51, 132, 0.2);
+    }
+  
+    * {
+      box-sizing: border-box;
+    }
+  
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+  
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 30px;
+    }
+  
+    .container {
+      max-width: 800px;
+      margin: 80px auto;
+      padding: 30px;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      animation: fadeInUp 0.8s ease-out;
+      position: relative;
+      z-index: 1;
+    }
+  
+    .form-group {
+      margin-bottom: 20px;
+    }
+  
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+  
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.2s ease;
+    }
+  
+    input:focus,
+    select:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+  
+    button {
+      display: inline-block;
+      padding: 12px 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(214, 51, 132, 0.2);
+    }
+  
+    button:hover {
+      background-color: #bf2b74;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(214, 51, 132, 0.3);
+    }
+  
+    .order-item {
+      background: var(--primary-light);
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 15px rgba(214, 51, 132, 0.2);
+      animation: fadeInUp 0.5s ease;
+    }
+  
+    .order-item p {
+      margin: 6px 0;
+    }
+  
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+  
+    .search-area {
+      margin-top: 40px;
+    }
+  
+    .search-area input {
+      border-radius: 30px;
+    }
+  
+    #totalProfit {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary-light);
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: bold;
+      box-shadow: 0 6px 15px rgba(214, 51, 132, 0.2);
+      z-index: 10;
+    }
+  
+    .clear-btn {
+      background-color: #6c757d;
+    }
+  
+    .clear-btn:hover {
+      background-color: #495057;
+    }
+  
+    /* 回首頁按鈕 */
+    .back-to-home-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: var(--primary);
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 30px;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
+      z-index: 10;
+    }
+  
+    .back-to-home-btn:hover {
+      background-color: #bf2b74;
+      transform: translateY(-2px);
+    }
+  
+    /* 進場動畫 */
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  
+    /* 背景飄心動畫 */
+    .floating-hearts::before {
+      content: '💖';
+      position: fixed;
+      font-size: 24px;
+      animation: floatHearts 20s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+      top: -50px;
+      left: 10%;
+      opacity: 0.3;
+    }
+  
+    @keyframes floatHearts {
+      0% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+      }
+      100% {
+        transform: translateY(100vh) translateX(20vw) rotate(360deg);
+      }
+    }
+  
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+  
+      .back-to-home-btn {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+    }
+  </style>
+  
+  
+  
+</head>
+<body>
+    <body class="floating-hearts">
+<div class="container">
+  <h1>訂單管理</h1>
+
+  <div class="form-group">
+    <label for="productName">商品名稱</label>
+    <input type="text" id="productName" placeholder="例如：T恤">
+  </div>
+
+  <div class="form-group">
+    <label for="customerName">客戶名稱</label>
+    <input type="text" id="customerName" placeholder="例如：小明">
+  </div>
+
+  <div class="form-group">
+    <label for="productCost">商品成本</label>
+    <input type="number" id="productCost" placeholder="例如：150">
+  </div>
+
+  <div class="form-group">
+    <label for="productPrice">商品售價</label>
+    <input type="number" id="productPrice" placeholder="例如：250">
+  </div>
+
+  <div class="form-group">
+    <label for="customDate">自訂日期（可空白）</label>
+    <input type="date" id="customDate">
+  </div>
+
+  <div class="button-group">
+    <button onclick="addOrder()">新增訂單</button>
+    <button class="clear-btn" onclick="clearAllOrders()">清除全部訂單</button>
+    <button class="clear-btn" onclick="toggleOrders()">顯示／隱藏訂單</button>
+    <button onclick="exportToCSV()">匯出 CSV</button>
+    <button onclick="exportToExcel()">匯出 Excel</button>
+  </div>
+
+  <div class="search-area">
+    <input type="text" id="searchProduct" placeholder="🔍 搜尋商品名稱" oninput="renderOrders(true)">
+    <input type="text" id="searchCustomer" placeholder="🔍 搜尋客戶名稱" oninput="renderOrders(true)">
+  </div>
+
+  <div id="orderListContainer">
+    <div id="orderList"></div>
+  </div>
+</div>
+
+<div id="totalProfit">目前總利潤：0</div>
+
+<a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
+
+<script>
+  let ordersVisible = true;
+
+  function addOrder() {
+    const name = document.getElementById('productName').value.trim();
+    const customer = document.getElementById('customerName').value.trim();
+    const cost = parseFloat(document.getElementById('productCost').value);
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const customDate = document.getElementById('customDate').value;
+
+    if (!name || !customer || isNaN(cost) || isNaN(price)) {
+      alert('請完整填寫資料');
+      return;
+    }
+
+    const orderDate = customDate ? customDate : new Date().toISOString().split('T')[0];
+
+    const order = {
+      id: Date.now(),
+      name,
+      customer,
+      cost,
+      price,
+      profit: price - cost,
+      date: orderDate
+    };
+
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    orders.push(order);
+    localStorage.setItem('orders', JSON.stringify(orders));
+
+    document.getElementById('productName').value = '';
+    document.getElementById('customerName').value = '';
+    document.getElementById('productCost').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('customDate').value = '';
+
+    renderOrders();
+    updateTotalProfit();
+  }
+
+  function renderOrders(forceShow = false) {
+    const container = document.getElementById('orderList');
+    const wrapper = document.getElementById('orderListContainer');
+    const searchProduct = document.getElementById('searchProduct').value.trim().toLowerCase();
+    const searchCustomer = document.getElementById('searchCustomer').value.trim().toLowerCase();
+    container.innerHTML = '';
+
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+
+    const filtered = orders.filter(order => {
+      const name = order.name?.toLowerCase() || '';
+      const customer = order.customer?.toLowerCase() || '';
+      return name.includes(searchProduct) && customer.includes(searchCustomer);
+    });
+
+    if (forceShow) {
+      ordersVisible = true;
+      wrapper.style.display = 'block';
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<p style="color: gray;">查無訂單</p>';
+      return;
+    }
+
+    filtered.forEach(order => {
+      const div = document.createElement('div');
+      div.className = 'order-item';
+      div.innerHTML = `
+        <p><strong>${order.name}</strong>（客戶：${order.customer}）</p>
+        <p>售價：${order.price}，成本：${order.cost}，利潤：${order.profit}</p>
+        <p>日期：${order.date}</p>
+        <button onclick="deleteOrder(${order.id})">刪除</button>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function toggleOrders() {
+    const container = document.getElementById('orderListContainer');
+    ordersVisible = !ordersVisible;
+    container.style.display = ordersVisible ? 'block' : 'none';
+  }
+
+  function deleteOrder(id) {
+    let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    orders = orders.filter(order => order.id !== id);
+    localStorage.setItem('orders', JSON.stringify(orders));
+    renderOrders();
+    updateTotalProfit();
+  }
+
+  function clearAllOrders() {
+    if (confirm('確定要刪除所有訂單嗎？此操作無法復原。')) {
+      localStorage.removeItem('orders');
+      renderOrders();
+      updateTotalProfit();
+    }
+  }
+
+  function updateTotalProfit() {
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const totalProfit = orders.reduce((sum, o) => sum + o.profit, 0);
+    document.getElementById('totalProfit').innerText = `目前總利潤：${totalProfit}`;
+  }
+
+  function exportToCSV() {
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    if (orders.length === 0) {
+      alert('目前沒有任何訂單可匯出。');
+      return;
+    }
+
+    const header = ['商品名稱', '客戶名稱', '成本', '售價', '利潤', '日期'];
+    const rows = orders.map(order => [
+      order.name,
+      order.customer,
+      order.cost,
+      order.price,
+      order.profit,
+      order.date
+    ]);
+
+    let csvContent = '\uFEFF' + header.join(',') + '\n' +
+      rows.map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `訂單匯出_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  }
+
+  function exportToExcel() {
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    if (orders.length === 0) {
+      alert('目前沒有任何訂單可匯出。');
+      return;
+    }
+
+    const table = `
+      <table border="1">
+        <tr>
+          <th>商品名稱</th>
+          <th>客戶名稱</th>
+          <th>成本</th>
+          <th>售價</th>
+          <th>利潤</th>
+          <th>日期</th>
+        </tr>
+        ${orders.map(order => `
+          <tr>
+            <td>${order.name}</td>
+            <td>${order.customer}</td>
+            <td>${order.cost}</td>
+            <td>${order.price}</td>
+            <td>${order.profit}</td>
+            <td>${order.date}</td>
+          </tr>
+        `).join('')}
+      </table>
+    `;
+
+    const blob = new Blob([`\uFEFF${table}`], { type: 'application/vnd.ms-excel' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `訂單匯出_${new Date().toISOString().split('T')[0]}.xls`;
+    link.click();
+  }
+
+  window.onload = function () {
+    renderOrders();
+    updateTotalProfit();
+  };
+</script>
+
+</body>
+</html>

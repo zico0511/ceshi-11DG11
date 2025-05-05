@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>11DG11｜報表分析</title>
+  <link rel="icon" href="favicon.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mini.min.js"></script>
+  <style>
+    :root {
+      --pink-main: #ff69b4;
+      --pink-accent: #ffa5d4;
+      --pink-glow: rgba(255, 105, 180, 0.2);
+      --text-color: #2e2e2e;
+      --bg-color: linear-gradient(to bottom right, #fff0f8, #fce4ec);
+      --glass-bg: rgba(255, 255, 255, 0.35);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+  
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  
+    @keyframes fadeInScale {
+      0% {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+  
+    body {
+      font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      animation: fadeIn 1s ease-out;
+    }
+  
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: #c21870;
+      letter-spacing: 0.5px;
+      animation: fadeInUp 0.8s ease-out both;
+      animation-delay: 0.3s;
+    }
+  
+    .top-right-buttons {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 12px;
+      z-index: 1000;
+      animation: fadeInUp 0.8s ease-out both;
+      animation-delay: 0.5s;
+    }
+  
+    .nav-btn {
+      background: linear-gradient(135deg, #ff69b4, #ffa5d4);
+      color: white;
+      padding: 10px 20px;
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 30px;
+      text-decoration: none;
+      box-shadow: 0 8px 20px var(--pink-glow);
+      backdrop-filter: blur(6px);
+      transition: all 0.3s ease;
+      border: none;
+    }
+  
+    .nav-btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      background: linear-gradient(135deg, #ff85c1, #ffc0da);
+      box-shadow: 0 10px 24px rgba(255, 105, 180, 0.4);
+    }
+  
+    .nav-buttons {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 0.8s ease-out both;
+      animation-delay: 0.6s;
+    }
+  
+    .nav-buttons a {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      padding: 10px 16px;
+      border-radius: 12px;
+      color: #d63384;
+      font-weight: 600;
+      backdrop-filter: blur(8px);
+      text-decoration: none;
+      box-shadow: 0 4px 12px var(--shadow-color);
+      transition: all 0.3s ease;
+    }
+  
+    .nav-buttons a:hover {
+      background: rgba(255, 255, 255, 0.5);
+      color: #b81f6b;
+      box-shadow: 0 6px 16px var(--shadow-color);
+    }
+  
+    .filter-container {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 0.8s ease-out both;
+      animation-delay: 0.7s;
+    }
+  
+    select,
+    input[type="date"],
+    button {
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      background-color: #fff;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+  
+    button {
+      background: linear-gradient(to right, #ff69b4, #ff8abd);
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+  
+    button:hover {
+      background: linear-gradient(to right, #ff85c1, #ffaccd);
+      transform: scale(1.03);
+      box-shadow: 0 6px 16px rgba(255, 105, 180, 0.3);
+    }
+  
+    .charts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: center;
+      margin-top: 30px;
+      animation: fadeInUp 0.8s ease-out both;
+      animation-delay: 0.8s;
+    }
+  
+    canvas {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      max-width: 420px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+  
+    canvas:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+    }
+  
+    /* 新增動畫：圖片預覽、表單、彈窗 */
+    .image-preview,
+    .form-container,
+    .modal {
+      animation: fadeInScale 0.6s ease-out both;
+    }
+  
+    .image-preview {
+      max-width: 300px;
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+    }
+  
+    .form-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      padding: 24px;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 20px var(--shadow-color);
+      margin-bottom: 30px;
+    }
+  
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+      z-index: 9999;
+      max-width: 90%;
+    }
+  </style>
+  
+</head>
+<body>
+  <h1>📊 報表分析</h1>
+
+  <div class="top-right-buttons">
+    <a href="products.html" class="nav-btn">📁 庫存管理</a>
+    <a href="orders.html" class="nav-btn">🧾 訂單管理</a>
+    <a href="home.html" class="nav-btn">🏠 返回主頁</a>
+  </div>
+  
+  <style>
+    .bottom-nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      background-color: #fff0f6;
+      padding: 12px 24px;
+      border-radius: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 999;
+      backdrop-filter: blur(10px);
+    }
+  
+    .bottom-nav a {
+      text-decoration: none;
+      color: #d63384;
+      font-weight: 600;
+      padding: 10px 18px;
+      background-color: #ffd6e7;
+      border-radius: 20px;
+      transition: 0.2s ease;
+      font-size: 15px;
+    }
+  
+    .bottom-nav a:hover {
+      background-color: #ffb8d4;
+    }
+  </style>
+  
+
+  <div class="filter-container">
+    <select id="yearSelect"></select>
+    <select id="monthSelect"></select>
+    <input type="date" id="startDate" />
+    <input type="date" id="endDate" />
+    <button onclick="generateReport()">生成報表</button>
+    <button onclick="exportToExcel()">匯出 Excel</button>
+  </div>
+
+  <div class="charts">
+    <canvas id="costRevenueChart" width="400" height="300"></canvas>
+    <canvas id="profitPieChart" width="300" height="300"></canvas>
+    <canvas id="categoryChart" width="300" height="300"></canvas>
+  </div>
+
+  <script>
+    let costRevenueChart, profitPieChart, categoryChart;
+
+    const yearSelect = document.getElementById('yearSelect');
+    const monthSelect = document.getElementById('monthSelect');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1;
+
+    yearSelect.innerHTML = '';
+    for (let y = currentYear - 5; y <= currentYear + 1; y++) {
+      yearSelect.innerHTML += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}年</option>`;
+    }
+
+    monthSelect.innerHTML = '';
+    for (let m = 1; m <= 12; m++) {
+      monthSelect.innerHTML += `<option value="${m}" ${m === currentMonth ? 'selected' : ''}>${m}月</option>`;
+    }
+
+    startDateInput.value = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+    endDateInput.value = today.toISOString().split('T')[0];
+
+    function generateReport() {
+      const startDate = new Date(startDateInput.value);
+      const endDate = new Date(endDateInput.value);
+      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+
+      let monthlyCost = 0, monthlyPrice = 0, monthlyProfit = 0;
+      const categoryMap = {};
+
+      orders.forEach(order => {
+        const date = new Date(order.date);
+        if (date >= startDate && date <= endDate) {
+          const cost = parseFloat(order.cost || 0);
+          const price = parseFloat(order.price || 0);
+          const profit = price - cost;
+          monthlyCost += cost;
+          monthlyPrice += price;
+          monthlyProfit += profit;
+
+          const category = order.category || "未分類";
+          if (!categoryMap[category]) categoryMap[category] = 0;
+          categoryMap[category] += price;
+        }
+      });
+
+      updateCharts(monthlyCost, monthlyPrice, monthlyProfit, categoryMap);
+    }
+
+    function updateCharts(cost, price, profit, categories) {
+      if (costRevenueChart) costRevenueChart.destroy();
+      if (profitPieChart) profitPieChart.destroy();
+      if (categoryChart) categoryChart.destroy();
+
+      const ctx1 = document.getElementById('costRevenueChart').getContext('2d');
+      costRevenueChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['成本', '售價'],
+          datasets: [{
+            label: '金額 (TWD)',
+            data: [cost, price],
+            backgroundColor: ['#ff9aa2', '#f6b2c0']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: '成本與售價比較'
+            }
+          }
+        }
+      });
+
+      const ctx2 = document.getElementById('profitPieChart').getContext('2d');
+      profitPieChart = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+          labels: ['利潤', '成本'],
+          datasets: [{
+            data: [profit, cost],
+            backgroundColor: ['#f67280', '#c06c84']
+          }]
+        },
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: '利潤百分比'
+            }
+          }
+        }
+      });
+
+      const ctx3 = document.getElementById('categoryChart').getContext('2d');
+      categoryChart = new Chart(ctx3, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(categories),
+          datasets: [{
+            data: Object.values(categories),
+            backgroundColor: Object.keys(categories).map((_, i) =>
+              `hsl(${i * 40}, 70%, 70%)`
+            )
+          }]
+        },
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: '商品分類銷售分析'
+            }
+          }
+        }
+      });
+    }
+
+    function exportToExcel() {
+      const data = JSON.parse(localStorage.getItem('orders') || '[]');
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "報表");
+      XLSX.writeFile(wb, "報表.xlsx");
+    }
+  </script>
+</body>
+</html>

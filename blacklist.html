@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>黑名單管理 - 11DG11</title>
+  <link rel="icon" href="favicon.png">
+  <style>
+    :root {
+      --primary-color: #ff66a3;
+      --secondary-color: #ffe6f0;
+      --border-color: #ffb3d9;
+      --gradient: linear-gradient(135deg, #ff9ebc, #ff66a3);
+      --shadow: 0 8px 24px rgba(255, 105, 180, 0.2);
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-blur: blur(12px);
+    }
+  
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #ffe6f0, #fff0f5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+  
+    .container {
+      animation: fadeInUp 0.8s ease-out;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      padding: 2.5rem;
+      border-radius: 1.5rem;
+      box-shadow: var(--shadow);
+      width: 500px;
+      border: 1px solid rgba(255, 192, 203, 0.2);
+    }
+  
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      font-size: 1.8rem;
+      margin-bottom: 1.2rem;
+    }
+  
+    input, button, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.6rem 0;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-color);
+      font-size: 1rem;
+      background-color: white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+  
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(255, 102, 163, 0.2);
+    }
+  
+    button {
+      background: var(--gradient);
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+  
+    button:hover {
+      background: linear-gradient(135deg, #ff80b3, #e05590);
+      transform: translateY(-1px);
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 1rem;
+      background: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+  
+    th, td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid #ffe0eb;
+    }
+  
+    th {
+      background-color: #fff0f7;
+      color: #d94f8b;
+      font-weight: bold;
+    }
+  
+    .link-button {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+  
+    .back-to-home-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: var(--gradient);
+      color: white;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 999px;
+      text-decoration: none;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      z-index: 9999;
+      animation: fadeInUp 0.6s ease-out 0.4s both;
+    }
+  
+    .back-to-home-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 105, 180, 0.4);
+    }
+  
+    @media (max-width: 600px) {
+      .container {
+        width: 90%;
+        padding: 1.5rem;
+      }
+      .back-to-home-btn {
+        font-size: 12px;
+        padding: 8px 14px;
+      }
+    }
+  </style>
+  
+</head>
+<body>
+  <div class="container">
+    <h1>黑名單管理</h1>
+
+    <!-- 黑名單新增表單 -->
+    <form id="blacklistForm">
+      <label for="lineId">LINE ID：</label>
+      <input type="text" id="lineId" required placeholder="輸入 LINE ID" />
+
+      <label for="reason">原因：</label>
+      <textarea id="reason" required placeholder="輸入原因" rows="4"></textarea>
+
+      <button type="submit" class="button">新增到黑名單</button>
+    </form>
+
+    <hr>
+
+    <h2>黑名單列表</h2>
+    <table id="blacklistTable">
+      <thead>
+        <tr>
+          <th>LINE ID</th>
+          <th>原因</th>
+          <th>操作人員 ID</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="blacklistItems">
+        <!-- 這裡會顯示所有被加入的黑名單資料 -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // 顯示黑名單
+    function loadBlacklist() {
+      const blacklist = JSON.parse(localStorage.getItem('blacklist')) || [];
+      const blacklistItems = document.getElementById('blacklistItems');
+      blacklistItems.innerHTML = '';
+
+      blacklist.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.lineId}</td>
+          <td>${item.reason}</td>
+          <td>${item.operatorId}</td>
+          <td><button onclick="removeBlacklistItem('${item.lineId}')">刪除</button></td>
+        `;
+        blacklistItems.appendChild(row);
+      });
+    }
+
+    // 新增黑名單
+    document.getElementById('blacklistForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const lineId = document.getElementById('lineId').value;
+      const reason = document.getElementById('reason').value;
+
+      // 確認用戶是否登入
+      const operatorId = localStorage.getItem('loggedInUser');  // 獲取當前登入用戶ID
+      if (!operatorId) {
+        alert("請先登入!");
+        return;
+      }
+
+      // 新增黑名單資料
+      const blacklist = JSON.parse(localStorage.getItem('blacklist')) || [];
+      blacklist.push({ lineId, reason, operatorId });
+      localStorage.setItem('blacklist', JSON.stringify(blacklist));
+
+      // 重載黑名單列表
+      loadBlacklist();
+
+      alert('已成功新增至黑名單');
+    });
+
+    // 刪除黑名單項目
+    function removeBlacklistItem(lineId) {
+      let blacklist = JSON.parse(localStorage.getItem('blacklist')) || [];
+      blacklist = blacklist.filter(item => item.lineId !== lineId);
+      localStorage.setItem('blacklist', JSON.stringify(blacklist));
+      loadBlacklist();
+    }
+
+    // 初始化時加載黑名單
+    loadBlacklist();
+  </script>
+    <a href="home.html" class="back-to-home-btn" title="返回主頁">🏠 返回主頁</a>
+</body>
+</html>
