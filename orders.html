@@ -7,203 +7,227 @@
    <!-- Firebase CDN -->
    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
-  <style>
+   <style>
     :root {
-      --primary: #d63384;
-      --primary-light: #fce4ef;
-      --bg: #fff0f6;
-      --text: #333;
+      --primary: #e3a8d3; /* 淡粉色 */
+      --primary-dark: #d29ac0; /* 深粉色 */
+      --secondary: #ffffff; /* 白色 */
+      --text: #4a4a4a; /* 深灰色 */
       --card-bg: #ffffff;
-      --border-radius: 16px;
-      --shadow: 0 10px 30px rgba(214, 51, 132, 0.2);
+      --border-radius: 30px;
+      --shadow: 0 12px 40px rgba(210, 154, 192, 0.1);
+      --highlight: #fbd7e0;
+      --font-family: 'Segoe UI', sans-serif;
     }
   
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
   
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg);
+      font-family: var(--font-family);
+      background: #fef2f6;
       color: var(--text);
+      line-height: 1.6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
       overflow-x: hidden;
+      flex-direction: column;
     }
   
     h1 {
       text-align: center;
-      color: var(--primary);
-      margin-bottom: 30px;
+      color: var(--primary-dark);
+      margin-bottom: 50px;
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-shadow: 0 4px 15px rgba(242, 138, 178, 0.2);
     }
   
     .container {
-      max-width: 800px;
-      margin: 80px auto;
-      padding: 30px;
+      width: 100%;
+      max-width: 700px;
+      padding: 40px;
       background: var(--card-bg);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow);
       animation: fadeInUp 0.8s ease-out;
       position: relative;
       z-index: 1;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+  
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
   
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
     }
   
     label {
       display: block;
-      margin-bottom: 6px;
       font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+      font-size: 18px;
     }
   
     input,
     select {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
       font-size: 16px;
-      transition: border-color 0.2s ease;
+      background-color: #f9f9f9;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
   
     input:focus,
     select:focus {
-      border-color: var(--primary);
+      border-color: var(--primary-dark);
       outline: none;
-    }
-  
-    button {
-      display: inline-block;
-      padding: 12px 20px;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 10px rgba(214, 51, 132, 0.2);
-    }
-  
-    button:hover {
-      background-color: #bf2b74;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(214, 51, 132, 0.3);
-    }
-  
-    .order-item {
-      background: var(--primary-light);
-      padding: 16px;
-      border-radius: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 15px rgba(214, 51, 132, 0.2);
-      animation: fadeInUp 0.5s ease;
-    }
-  
-    .order-item p {
-      margin: 6px 0;
+      box-shadow: 0 0 8px rgba(242, 138, 178, 0.3);
     }
   
     .button-group {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
+      flex-direction: column;
+      gap: 16px;
     }
   
-    .search-area {
-      margin-top: 40px;
-    }
-  
-    .search-area input {
+    button {
+      padding: 14px 28px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
       border-radius: 30px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(242, 138, 178, 0.2);
+      width: 100%;
     }
   
+    button:hover {
+      background-color: var(--primary-dark);
+      box-shadow: 0 12px 30px rgba(242, 138, 178, 0.3);
+      transform: translateY(-4px);
+    }
+  
+    .order-item {
+      background: var(--highlight);
+      padding: 24px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 25px rgba(210, 154, 192, 0.1);
+      animation: fadeInUp 0.6s ease;
+    }
+  
+    .order-item p {
+      margin: 10px 0;
+      font-size: 16px;
+      color: var(--text);
+    }
+  
+    /* 總利潤顯示 */
     #totalProfit {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--primary-light);
-      padding: 14px 20px;
-      border-radius: 14px;
+      bottom: 30px;
+      right: 30px;
+      background: var(--primary-dark);
+      color: white;
+      font-size: 18px;
+      padding: 15px 25px;
+      border-radius: 25px;
       font-weight: bold;
-      box-shadow: 0 6px 15px rgba(214, 51, 132, 0.2);
+      box-shadow: 0 6px 15px rgba(242, 138, 178, 0.2);
       z-index: 10;
+      transition: background-color 0.3s ease;
     }
   
-    .clear-btn {
-      background-color: #6c757d;
+    #totalProfit:hover {
+      background-color: var(--primary);
+      cursor: pointer;
     }
   
-    .clear-btn:hover {
-      background-color: #495057;
-    }
-  
-    /* 回首頁按鈕 */
     .back-to-home-btn {
       position: fixed;
       top: 20px;
       right: 20px;
       background-color: var(--primary);
       color: white;
-      padding: 10px 20px;
+      padding: 12px 24px;
       font-size: 16px;
       font-weight: bold;
       border-radius: 30px;
       text-decoration: none;
-      box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
+      box-shadow: 0 8px 20px rgba(255, 105, 180, 0.2);
       z-index: 10;
+      animation: backButtonIn 1.5s ease-out;
+    }
+  
+    @keyframes backButtonIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
     }
   
     .back-to-home-btn:hover {
-      background-color: #bf2b74;
-      transform: translateY(-2px);
+      background-color: var(--primary-dark);
+      transform: translateY(-4px);
     }
   
-    /* 進場動畫 */
-    @keyframes fadeInUp {
-      0% {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  
-    /* 背景飄心動畫 */
-    .floating-hearts::before {
-      content: '💖';
-      position: fixed;
-      font-size: 24px;
-      animation: floatHearts 20s linear infinite;
-      z-index: 0;
-      pointer-events: none;
-      top: -50px;
-      left: 10%;
-      opacity: 0.3;
-    }
-  
-    @keyframes floatHearts {
-      0% {
-        transform: translateY(0) translateX(0) rotate(0deg);
-      }
-      100% {
-        transform: translateY(100vh) translateX(20vw) rotate(360deg);
-      }
-    }
-  
-    @media (max-width: 600px) {
+    /* 響應式設計 - 小屏幕優化 */
+    @media (max-width: 768px) {
       .container {
-        padding: 20px;
+        padding: 30px;
+        width: 90%;
+      }
+  
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 30px;
       }
   
       .back-to-home-btn {
         font-size: 14px;
         padding: 8px 16px;
+      }
+  
+      #totalProfit {
+        font-size: 16px;
+        padding: 12px 20px;
+      }
+    }
+  
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+  
+      button {
+        font-size: 16px;
+        padding: 12px 24px;
+      }
+  
+      .form-group {
+        margin-bottom: 20px;
+      }
+  
+      input,
+      select {
+        padding: 14px;
+        font-size: 14px;
       }
     }
   </style>
