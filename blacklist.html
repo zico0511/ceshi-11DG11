@@ -292,6 +292,13 @@
      // 登出函式
      function logout() {
       sessionStorage.removeItem('loggedInUserId');  // 清除登入資訊
+      // 更新 Firestore 中的 loggedIn 欄位為 false
+      const userId = sessionStorage.getItem('loggedInUserId');
+      if (userId) {
+        db.collection('users').doc(userId).update({
+          loggedIn: false
+        });
+      }
       // 登出後跳轉到登入頁面
       window.location.href = 'login.html';  // 替換成你的登入頁面
     }
