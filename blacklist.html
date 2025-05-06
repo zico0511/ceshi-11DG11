@@ -192,7 +192,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
   <script>
-    // ✅ 你的 Firebase 設定
+    // ✅ Firebase 設定
     const firebaseConfig = {
       apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
       authDomain: "dg11-c954c.firebaseapp.com",
@@ -204,39 +204,39 @@
     const db = firebase.firestore();
     const tableBody = document.getElementById("blacklistItems");
 
-      // 在頁面載入後執行
-  window.addEventListener('DOMContentLoaded', function() {
-    const userId = sessionStorage.getItem('loggedInUserId');  // 從 sessionStorage 獲取用戶 ID
+    // 在頁面載入後執行
+    window.addEventListener('DOMContentLoaded', function() {
+      const userId = sessionStorage.getItem('loggedInUserId');  // 從 sessionStorage 獲取用戶 ID
 
-    if (!userId) {
-      // 如果用戶未登入，跳轉到登入頁面
-      window.location.href = 'index.html';  // 替換成你的登入頁面
-    } else {
-      // 從 Firestore 查詢用戶資料
-      db.collection('users').doc(userId).get()
-        .then((doc) => {
-          if (doc.exists) {
-            const userData = doc.data();
+      if (!userId) {
+        // 如果用戶未登入，跳轉到登入頁面
+        window.location.href = 'index.html';  // 替換成你的登入頁面
+      } else {
+        // 從 Firestore 查詢用戶資料
+        db.collection('users').doc(userId).get()
+          .then((doc) => {
+            if (doc.exists) {
+              const userData = doc.data();
 
-            // 檢查用戶是否已登入（根據 Firestore 中的 loggedIn 欄位）
-            if (!userData.loggedIn) {
-              // 用戶未登入，跳轉到登入頁面
-              window.location.href = 'index.html';  // 替換成登入頁面
+              // 檢查用戶是否已登入（根據 Firestore 中的 loggedIn 欄位）
+              if (!userData.loggedIn) {
+                // 用戶未登入，跳轉到登入頁面
+                window.location.href = 'index.html';  // 替換成登入頁面
+              } else {
+                // 如果是已登入的用戶，顯示頁面
+                document.getElementById('user-id').textContent = `已登入：${userData.username}`;
+                renderList();  // 顯示黑名單列表
+              }
             } else {
-              // 如果是已登入的用戶，顯示頁面
-              document.getElementById('user-id').textContent = `已登入：${userData.username}`;
-              renderList();  // 顯示黑名單列表
+              window.location.href = 'index.html';  // 用戶資料不存在，跳轉到登入頁面
             }
-          } else {
-            window.location.href = 'index.html';  // 用戶資料不存在，跳轉到登入頁面
-          }
-        })
-        .catch((error) => {
-          console.error("查詢錯誤：", error);
-          window.location.href = 'index.html';  // 查詢錯誤，跳轉到登入頁面
-        });
-    }
-  });
+          })
+          .catch((error) => {
+            console.error("查詢錯誤：", error);
+            window.location.href = 'index.html';  // 查詢錯誤，跳轉到登入頁面
+          });
+      }
+    });
 
     // 監聽並顯示列表
     function renderList() {
@@ -285,27 +285,27 @@
       }
     }
 
- // 登出函式
- function logout() {
-    const userId = sessionStorage.getItem('loggedInUserId'); // 先獲取當前用戶的 ID
+    // 登出函式
+    function logout() {
+      const userId = sessionStorage.getItem('loggedInUserId'); // 先獲取當前用戶的 ID
 
-    if (userId) {
-      // 更新 Firestore 中的 loggedIn 欄位為 false
-      db.collection('users').doc(userId).update({
-        loggedIn: false
-      }).then(() => {
-        // 清除 sessionStorage 登入資料
-        sessionStorage.removeItem('loggedInUserId');
-        localStorage.removeItem('loggedInUser'); // 如果有儲存用戶名，也可以清除
+      if (userId) {
+        // 更新 Firestore 中的 loggedIn 欄位為 false
+        db.collection('users').doc(userId).update({
+          loggedIn: false
+        }).then(() => {
+          // 清除 sessionStorage 登入資料
+          sessionStorage.removeItem('loggedInUserId');
+          localStorage.removeItem('loggedInUser'); // 如果有儲存用戶名，也可以清除
 
-        // 登出後跳轉到登入頁面
-        window.location.href = 'index.html';  // 替換成你的登入頁面
-      }).catch((error) => {
-        console.error("登出錯誤：", error);
-        alert("登出失敗，請稍後再試");
-      });
+          // 登出後跳轉到登入頁面
+          window.location.href = 'index.html';  // 替換成你的登入頁面
+        }).catch((error) => {
+          console.error("登出錯誤：", error);
+          alert("登出失敗，請稍後再試");
+        });
+      }
     }
-  }
 </script>
   <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
 </body>
