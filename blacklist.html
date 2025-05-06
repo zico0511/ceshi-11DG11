@@ -203,7 +203,7 @@
     const db = firebase.firestore();
     const tableBody = document.getElementById("blacklistItems");
   
-    // ✅ 檢查登入狀態
+    // ✅ 檢查登入狀態（不限制角色）
     window.addEventListener('DOMContentLoaded', () => {
       const userId = sessionStorage.getItem('loggedInUserId');
   
@@ -229,7 +229,7 @@
           // 顯示使用者名稱
           document.getElementById('user-id').textContent = `已登入：${userData.username}`;
   
-          // ✅ 已登入者載入黑名單列表
+          // ✅ 登入成功即可讀取黑名單
           renderList();
         })
         .catch((err) => {
@@ -238,7 +238,7 @@
         });
     });
   
-    // 渲染黑名單列表
+    // ✅ 渲染黑名單列表
     function renderList() {
       db.collection("blacklist").orderBy("time", "desc").onSnapshot(snapshot => {
         tableBody.innerHTML = "";
@@ -256,7 +256,7 @@
       });
     }
   
-    // 新增黑名單
+    // ✅ 新增黑名單
     document.getElementById("blacklistForm").addEventListener("submit", e => {
       e.preventDefault();
       const lineId = document.getElementById("lineId").value.trim();
@@ -276,13 +276,14 @@
       });
     });
   
-    // 刪除資料
+    // ✅ 刪除黑名單資料
     function deleteItem(id) {
       if (confirm("確定要刪除這筆資料嗎？")) {
         db.collection("blacklist").doc(id).delete();
       }
     }
   </script>
+  
   
   <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
 </body>
