@@ -192,11 +192,12 @@
               return;
             }
   
-            // 儲存新用戶到 Firestore
-            db.collection('users').add({
-              username: username,
-              password: password
-            })
+        // 儲存新用戶資料到 Firestore
+        db.collection("users").add({
+          username: username,
+          password: password,
+          loggedIn: false  // 初始狀態設定為未登入
+        })
             .then(() => {
               alert('註冊成功！');
               window.location.href = 'index.html'; // 註冊成功後跳轉到登入頁
