@@ -7,120 +7,160 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
-    body {
-      font-family: 'Rubik', 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 60px auto;
-      padding: 40px;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(20px);
-      border-radius: 24px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.4);
-      animation: fadeIn 0.6s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    h1 {
-      text-align: center;
-      color: #ff4081;
-      font-size: 2.8rem;
-      font-weight: 700;
-      margin-bottom: 40px;
-      text-shadow: 0 2px 6px rgba(255, 64, 129, 0.3);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      border-radius: 16px;
-      overflow: hidden;
-      background: #ffffffee;
-    }
-    th, td {
-      padding: 16px;
-      border-bottom: 1px solid #eaeaea;
-      font-size: 0.95rem;
-    }
-    th {
-      background: linear-gradient(90deg, #ffe0f0 0%, #fce4ec 100%);
-      color: #d81b60;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    td input, td select {
-      padding: 8px 10px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      font-size: 0.9rem;
-      background-color: #fdfdfd;
-    }
-    td input:focus, td select:focus {
-      border-color: #ff80ab;
-      box-shadow: 0 0 6px rgba(255, 128, 171, 0.5);
-    }
-    td input[type="number"] {
-      width: 80px;
-    }
-    td input[type="text"] {
-      width: 140px;
-    }
-    .action-buttons button {
-      margin: 0 6px;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 30px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .save-btn {
-      background: linear-gradient(145deg, #00c9a7, #00e5b2);
-      color: white;
-    }
-    .save-btn:hover {
-      background: linear-gradient(145deg, #00bfa5, #00d1a0);
-    }
-    .delete-btn {
-      background: linear-gradient(145deg, #f44336, #e57373);
-      color: white;
-    }
-    .delete-btn:hover {
-      background: linear-gradient(145deg, #d32f2f, #ef5350);
-    }
-    .add-btn {
-      display: block;
-      margin: 30px auto 0;
-      padding: 14px 28px;
-      font-size: 1rem;
-      background: linear-gradient(to right, #ff5f8f, #ff80ab);
-      color: white;
-      border: none;
-      border-radius: 40px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .add-btn:hover {
-      background: linear-gradient(to right, #ff4081, #f06292);
-      transform: scale(1.05);
-    }
-    .back-to-home-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(to right, #ec407a, #ab47bc);
-      color: #fff;
-      padding: 10px 20px;
-      font-weight: bold;
-      text-decoration: none;
-      border-radius: 40px;
-    }
+   @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+
+body {
+  font-family: 'Rubik', 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #ffe1f0, #fcd6f7, #f9e0f5);
+  margin: 0;
+  padding: 0;
+  color: #333;
+  background-size: 400% 400%;
+  animation: gradientMove 20s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
+.container {
+  max-width: 1000px;
+  margin: 60px auto;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(25px);
+  border-radius: 28px;
+  box-shadow: 0 8px 30px rgba(255, 105, 180, 0.25);
+  animation: fadeIn 0.7s ease;
+  border: 1px solid rgba(255, 192, 203, 0.4);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+  text-align: center;
+  color: #ff3e88;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  text-shadow: 0 4px 16px rgba(255, 64, 129, 0.4);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(255, 182, 193, 0.3);
+}
+
+th, td {
+  padding: 16px;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #f2c4d9;
+}
+
+th {
+  background: linear-gradient(90deg, #ffc1e3 0%, #ffdef0 100%);
+  color: #d81b60;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+td input, td select {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid #f48fb1;
+  font-size: 0.9rem;
+  background-color: #fff0f6;
+  transition: all 0.3s ease;
+}
+
+td input:focus, td select:focus {
+  border-color: #ff4081;
+  box-shadow: 0 0 10px rgba(255, 105, 180, 0.6);
+}
+
+.action-buttons button {
+  margin: 0 6px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 105, 180, 0.25);
+}
+
+.save-btn {
+  background: linear-gradient(145deg, #ff5f8f, #ff80ab);
+  color: white;
+}
+
+.save-btn:hover {
+  background: linear-gradient(145deg, #ff4081, #f06292);
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(255, 105, 180, 0.6);
+}
+
+.delete-btn {
+  background: linear-gradient(145deg, #ff6e7f, #ffb199);
+  color: white;
+}
+
+.delete-btn:hover {
+  background: linear-gradient(145deg, #f44336, #e57373);
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(255, 138, 128, 0.6);
+}
+
+.add-btn {
+  display: block;
+  margin: 30px auto 0;
+  padding: 16px 32px;
+  font-size: 1rem;
+  background: linear-gradient(to right, #ff5f8f, #ff80ab);
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
+  transition: all 0.3s ease;
+}
+
+.add-btn:hover {
+  background: linear-gradient(to right, #ff4081, #f06292);
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(255, 105, 180, 0.6);
+}
+
+.back-to-home-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(to right, #ec407a, #ab47bc);
+  color: #fff;
+  padding: 12px 24px;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 40px;
+  box-shadow: 0 4px 14px rgba(236, 64, 122, 0.4);
+  transition: all 0.3s ease;
+}
+
+.back-to-home-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 14px rgba(236, 64, 122, 0.6);
+}
+
   </style>
 </head>
 <body>
