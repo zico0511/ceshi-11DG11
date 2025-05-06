@@ -221,7 +221,7 @@
             // 檢查用戶是否已登入（根據 Firestore 中的 loggedIn 欄位）
             if (!userData.loggedIn) {
               // 用戶未登入，跳轉到登入頁面
-              window.location.href = 'login.html';  // 替換成登入頁面
+              window.location.href = 'index.html';  // 替換成登入頁面
             } else {
               // 如果是已登入的用戶，顯示頁面
               document.getElementById('user-id').textContent = `已登入：${userData.username}`;
