@@ -145,7 +145,12 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
+
+
   <script>
+    
+    let isVerified = false;
+
     emailjs.init('x7qRqNbN7C3eGzGQP');
 
     var firebaseConfig = {
@@ -168,6 +173,11 @@
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (!isVerified) {
+  alert('請先完成 Email 驗證後再註冊！');
+  return;
+}
 
         if (password !== confirmPassword) {
           alert('密碼不一致！');
@@ -238,12 +248,13 @@
         const now = new Date().getTime();
 
         if (now > data.expiresAt) {
-          alert("驗證碼已過期，請重新發送");
-        } else if (userCode === data.code) {
-          alert("✅ 驗證成功！可以註冊帳號了");
-        } else {
-          alert("驗證碼錯誤，請重新輸入");
-        }
+  alert("驗證碼已過期，請重新發送");
+} else if (userCode === data.code) {
+  isVerified = true;
+  alert("✅ 驗證成功！可以註冊帳號了");
+} else {
+  alert("驗證碼錯誤，請重新輸入");
+}
       } catch (err) {
         console.error("驗證錯誤：", err);
         alert("驗證失敗，請稍後再試");
