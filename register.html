@@ -6,19 +6,6 @@
   <title>註冊 - 11DG11</title>
   <link rel="icon" href="favicon.png">
   <style>
-    @keyframes fadeInGlass {
-      0% {
-        opacity: 0;
-        transform: translateY(40px);
-        filter: blur(8px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-        filter: blur(0);
-      }
-    }
-  
     body {
       font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
       background: linear-gradient(135deg, #ffe6f0, #ffd9ec, #ffe6f0);
@@ -30,130 +17,238 @@
       background-size: 200% 200%;
       animation: gradientShift 10s ease infinite;
     }
-  
+
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-  
+
     .container {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(15px);
-      padding: 2.5rem;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(20px);
+      padding: 2rem;
       border-radius: 1.5rem;
-      box-shadow: 0 20px 40px rgba(255, 105, 180, 0.2);
-      width: 400px;
-      animation: fadeInGlass 0.9s ease-out;
-      transition: all 0.3s ease-in-out;
-      border: 1px solid rgba(255, 182, 193, 0.2);
+      box-shadow: 0 10px 30px rgba(255, 105, 180, 0.2);
+      width: 100%;
+      max-width: 420px;
+      animation: fadeIn 0.6s ease-out;
     }
-  
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     h1 {
       text-align: center;
       color: #ff4d94;
-      font-size: 1.8rem;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
     }
-  
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #d63384;
+    }
+
     input, button {
       width: 100%;
-      padding: 0.75rem;
-      margin: 0.6rem 0;
+      padding: 0.7rem;
+      margin-top: 0.4rem;
       border-radius: 0.75rem;
       border: 1px solid #ffcce5;
       font-size: 1rem;
-      transition: all 0.2s ease;
     }
-  
+
     input:focus {
       outline: none;
       border-color: #ff99c2;
       box-shadow: 0 0 0 3px rgba(255, 153, 194, 0.3);
     }
-  
+
     button {
+      margin-top: 1.2rem;
       background: linear-gradient(to right, #ff66a3, #ff85b3);
       color: white;
-      font-weight: 600;
+      font-weight: bold;
       border: none;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
+      transition: background 0.3s ease;
     }
-  
+
     button:hover {
       background: linear-gradient(to right, #e05590, #ff66a3);
-      box-shadow: 0 6px 14px rgba(255, 105, 180, 0.4);
     }
-  
+
+    .section {
+      margin-top: 1.5rem;
+    }
+
     .link-button {
-      background-color: transparent;
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
       color: #ff66a3;
       text-decoration: underline;
-      text-align: center;
-      display: block;
-      margin-top: 1rem;
-      cursor: pointer;
       font-size: 0.95rem;
+      cursor: pointer;
     }
-  
+
     .link-button:hover {
       color: #e05590;
-      text-decoration: none;
     }
   </style>
-  
 </head>
 <body>
   <div class="container">
     <h1>註冊帳號</h1>
     <form id="registerForm">
-      <label for="username">用戶名：</label>
+      <label for="username">用戶名</label>
       <input type="text" id="username" required placeholder="輸入用戶名" />
 
-      <label for="password">密碼：</label>
+      <label for="password">密碼</label>
       <input type="password" id="password" required placeholder="輸入密碼" />
 
-      <label for="confirmPassword">確認密碼：</label>
-      <input type="password" id="confirmPassword" required placeholder="確認密碼" />
+      <label for="confirmPassword">確認密碼</label>
+      <input type="password" id="confirmPassword" required placeholder="再次輸入密碼" />
 
       <button type="submit">註冊</button>
     </form>
-    
-    <p style="text-align: center;">已經有帳號？<a href="index.html" class="link-button">直接登入</a></p>
+
+    <div class="section">
+      <form id="emailVerifyForm">
+        <label for="verifyEmail">限定 Email</label>
+        <input type="email" id="verifyEmail" required placeholder="輸入授權 Email" />
+        <button type="submit">發送驗證碼</button>
+      </form>
+    </div>
+
+    <div class="section" id="codeSection" style="display: none;">
+      <label for="verifyCode">輸入驗證碼</label>
+      <input type="text" id="verifyCode" required placeholder="六位數驗證碼" />
+      <button onclick="verifyCode()">驗證</button>
+    </div>
+
+    <a href="index.html" class="link-button">已經有帳號？登入</a>
   </div>
 
+  <!-- JS scripts 放置於底部 -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <script>
-    // 註冊表單提交事件
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+    emailjs.init('x7qRqNbN7C3eGzGQP');
 
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
+    var firebaseConfig = {
+      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+      authDomain: "dg11-c954c.firebaseapp.com",
+      projectId: "dg11-c954c",
+      storageBucket: "dg11-c954c.appspot.com",
+      messagingSenderId: "1010585577335",
+      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+    };
 
-      if (password !== confirmPassword) {
-        alert('密碼不一致！');
-        return;
-      }
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
 
-      // 檢查是否已有此用戶名
-      let users = JSON.parse(localStorage.getItem('users')) || [];
-      const userExists = users.some(user => user.username === username);
+    const fixedEmail = "q5413692@gmail.com";
 
-      if (userExists) {
-        alert('此帳號已經存在！');
-        return;
-      }
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
 
-      // 新增用戶到本地儲存
-      const newUser = { username, password };
-      users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users));
+        if (password !== confirmPassword) {
+          alert('密碼不一致！');
+          return;
+        }
 
-      alert('註冊成功！');
-      window.location.href = 'index.html'; // 註冊成功後跳轉到登入頁
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        const userExists = users.some(user => user.username === username);
+
+        if (userExists) {
+          alert('此帳號已經存在！');
+          return;
+        }
+
+        const newUser = { username, password };
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+
+        alert('註冊成功！');
+        window.location.href = 'index.html';
+      });
+
+      const form = document.getElementById('emailVerifyForm');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('verifyEmail').value.trim();
+
+        if (email !== fixedEmail) {
+          alert("此 Email 無授權註冊");
+          return;
+        }
+
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date().getTime() + 5 * 60 * 1000;
+
+        try {
+          await db.collection('verifications').doc(email).set({ code, expiresAt });
+
+          await emailjs.send('service_3b5o83t', 'Verification Code Templa', {
+            to_email: email,
+            code: code
+          });
+
+          alert("驗證碼已寄出！");
+          document.getElementById('codeSection').style.display = 'block';
+        } catch (err) {
+          console.error("寄送失敗：", err);
+          alert("寄送失敗，請稍後再試");
+        }
+      });
     });
+
+    async function verifyCode() {
+      const email = document.getElementById('verifyEmail').value.trim();
+      const userCode = document.getElementById('verifyCode').value.trim();
+
+      try {
+        const docRef = db.collection('verifications').doc(email);
+        const docSnap = await docRef.get();
+
+        if (!docSnap.exists) {
+          alert("找不到驗證紀錄，請重新請求驗證碼");
+          return;
+        }
+
+        const data = docSnap.data();
+        const now = new Date().getTime();
+
+        if (now > data.expiresAt) {
+          alert("驗證碼已過期，請重新發送");
+        } else if (userCode === data.code) {
+          alert("✅ 驗證成功！可以註冊帳號了");
+        } else {
+          alert("驗證碼錯誤，請重新輸入");
+        }
+      } catch (err) {
+        console.error("驗證錯誤：", err);
+        alert("驗證失敗，請稍後再試");
+      }
+    }
   </script>
 </body>
 </html>
