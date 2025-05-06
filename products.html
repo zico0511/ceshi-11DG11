@@ -7,161 +7,263 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
-   @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
-
-body {
-  font-family: 'Rubik', 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #ffe1f0, #fcd6f7, #f9e0f5);
-  margin: 0;
-  padding: 0;
-  color: #333;
-  background-size: 400% 400%;
-  animation: gradientMove 20s ease infinite;
-}
-
-@keyframes gradientMove {
-  0% {background-position: 0% 50%;}
-  50% {background-position: 100% 50%;}
-  100% {background-position: 0% 50%;}
-}
-
-.container {
-  max-width: 1000px;
-  margin: 60px auto;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(25px);
-  border-radius: 28px;
-  box-shadow: 0 8px 30px rgba(255, 105, 180, 0.25);
-  animation: fadeIn 0.7s ease;
-  border: 1px solid rgba(255, 192, 203, 0.4);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-h1 {
-  text-align: center;
-  color: #ff3e88;
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 40px;
-  text-shadow: 0 4px 16px rgba(255, 64, 129, 0.4);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(255, 182, 193, 0.3);
-}
-
-th, td {
-  padding: 16px;
-  font-size: 0.95rem;
-  border-bottom: 1px solid #f2c4d9;
-}
-
-th {
-  background: linear-gradient(90deg, #ffc1e3 0%, #ffdef0 100%);
-  color: #d81b60;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-td input, td select {
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid #f48fb1;
-  font-size: 0.9rem;
-  background-color: #fff0f6;
-  transition: all 0.3s ease;
-}
-
-td input:focus, td select:focus {
-  border-color: #ff4081;
-  box-shadow: 0 0 10px rgba(255, 105, 180, 0.6);
-}
-
-.action-buttons button {
-  margin: 0 6px;
-  padding: 10px 18px;
-  border: none;
-  border-radius: 50px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(255, 105, 180, 0.25);
-}
-
-.save-btn {
-  background: linear-gradient(145deg, #ff5f8f, #ff80ab);
-  color: white;
-}
-
-.save-btn:hover {
-  background: linear-gradient(145deg, #ff4081, #f06292);
-  transform: scale(1.05);
-  box-shadow: 0 0 12px rgba(255, 105, 180, 0.6);
-}
-
-.delete-btn {
-  background: linear-gradient(145deg, #ff6e7f, #ffb199);
-  color: white;
-}
-
-.delete-btn:hover {
-  background: linear-gradient(145deg, #f44336, #e57373);
-  transform: scale(1.05);
-  box-shadow: 0 0 12px rgba(255, 138, 128, 0.6);
-}
-
-.add-btn {
-  display: block;
-  margin: 30px auto 0;
-  padding: 16px 32px;
-  font-size: 1rem;
-  background: linear-gradient(to right, #ff5f8f, #ff80ab);
-  color: white;
-  border: none;
-  border-radius: 40px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
-  transition: all 0.3s ease;
-}
-
-.add-btn:hover {
-  background: linear-gradient(to right, #ff4081, #f06292);
-  transform: scale(1.08);
-  box-shadow: 0 0 16px rgba(255, 105, 180, 0.6);
-}
-
-.back-to-home-btn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: linear-gradient(to right, #ec407a, #ab47bc);
-  color: #fff;
-  padding: 12px 24px;
-  font-weight: bold;
-  text-decoration: none;
-  border-radius: 40px;
-  box-shadow: 0 4px 14px rgba(236, 64, 122, 0.4);
-  transition: all 0.3s ease;
-}
-
-.back-to-home-btn:hover {
-  transform: scale(1.06);
-  box-shadow: 0 0 14px rgba(236, 64, 122, 0.6);
-}
-
-  </style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap');
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7));
+      overflow: hidden;
+      color: #fff;
+      position: relative;
+      animation: bgMovement 10s infinite ease-in-out;
+    }
+    
+    /* 背景動態效果 */
+    @keyframes bgMovement {
+      0% { background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7)); }
+      50% { background: radial-gradient(circle, rgba(255, 200, 220, 0.8), rgba(255, 160, 180, 0.8)); }
+      100% { background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7)); }
+    }
+    
+    /* 微粒子背景 */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+      animation: particles 60s linear infinite;
+    }
+    
+    @keyframes particles {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(100%, 100%); }
+    }
+    
+    /* 容器 */
+    .container {
+      max-width: 1000px;
+      margin: 60px auto;
+      padding: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(40px);
+      border-radius: 40px;
+      box-shadow: 0 8px 40px rgba(255, 80, 135, 0.2), 0 16px 60px rgba(255, 105, 180, 0.3);
+      position: relative;
+      z-index: 1;
+      animation: fadeIn 1.2s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* 標題 */
+    h1 {
+      text-align: center;
+      font-size: 3.8rem;
+      color: #ff4081;
+      text-shadow: 0 6px 12px rgba(255, 64, 129, 0.4), 0 0 20px #ff80ab;
+      margin-bottom: 60px;
+      position: relative;
+      animation: titleIn 1.5s ease-out;
+    }
+    
+    @keyframes titleIn {
+      0% { opacity: 0; transform: translateY(-40px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* 光效圓環 */
+    h1::after {
+      content: '';
+      position: absolute;
+      top: 110%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 2px solid #ff80ab;
+      box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
+      animation: glowRing 2s infinite ease-in-out;
+    }
+    
+    @keyframes glowRing {
+      0% { opacity: 0.6; transform: translateX(-50%) scale(0.9); }
+      50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+      100% { opacity: 0.6; transform: translateX(-50%) scale(0.9); }
+    }
+    
+    /* 表格 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(255, 105, 180, 0.2);
+      animation: tableIn 1s ease-out;
+    }
+    
+    @keyframes tableIn {
+      0% { opacity: 0; transform: translateY(40px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    th, td {
+      padding: 18px 24px;
+      text-align: left;
+      font-size: 1.1rem;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    
+    th {
+      background: linear-gradient(90deg, #ff80ab, #ffb6c1);
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    td input, td select {
+      padding: 12px 16px;
+      width: 100%;
+      border: none;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.3);
+      color: #fff;
+      font-size: 1rem;
+      box-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    td input:focus, td select:focus {
+      background: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 25px rgba(255, 105, 180, 0.4);
+    }
+    
+    /* 按鈕 */
+    .action-buttons button {
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: #fff;
+      border: none;
+      background: linear-gradient(145deg, #ff80ab, #ffb6c1);
+      box-shadow: 0 0 25px rgba(255, 105, 180, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.4s ease;
+      animation: buttonIn 1.5s ease-out;
+    }
+    
+    @keyframes buttonIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    
+    .action-buttons button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
+    }
+    
+    .save-btn {
+      background: linear-gradient(145deg, #00c9a7, #00e5b2);
+    }
+    
+    .delete-btn {
+      background: linear-gradient(145deg, #f44336, #e57373);
+    }
+    
+    /* 新增按鈕 */
+    .add-btn {
+      display: block;
+      margin: 70px auto 0;
+      padding: 20px 40px;
+      font-size: 1.2rem;
+      border-radius: 50px;
+      font-weight: bold;
+      background: linear-gradient(to right, #ff80ab, #ffb6c1);
+      color: white;
+      box-shadow: 0 0 40px rgba(255, 105, 180, 0.4);
+      transition: transform 0.3s ease, box-shadow 0.4s ease;
+      animation: addButtonIn 1.5s ease-out;
+    }
+    
+    @keyframes addButtonIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    
+    .add-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
+    }
+    
+    /* 回首頁 */
+    .back-to-home-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(to right, #ec407a, #ba68c8);
+      color: #fff;
+      padding: 14px 28px;
+      font-weight: bold;
+      border-radius: 50px;
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+      text-decoration: none;
+      transition: transform 0.3s ease;
+      animation: backButtonIn 2s ease-out;
+    }
+    
+    @keyframes backButtonIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    
+    .back-to-home-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+    }
+    
+    /* 鼠標跟隨粒子 */
+    body::after {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #ff80ab;
+      animation: mouseParticles 0.3s ease-in-out infinite;
+    }
+    
+    @keyframes mouseParticles {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0); }
+    }
+    
+    /* 背景粒子動態 */
+    @keyframes particles {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(100%, 100%); }
+    }
+    
+    </style>
+    
+    
+    
+    
 </head>
 <body>
   <div class="container">
