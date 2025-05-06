@@ -7,19 +7,21 @@
   <link rel="icon" href="favicon.png">
   <style>
     :root {
-      --primary-color: #ff66a3;
-      --secondary-color: #ffe6f0;
-      --border-color: #ffb3d9;
-      --gradient: linear-gradient(135deg, #ff9ebc, #ff66a3);
-      --shadow: 0 8px 24px rgba(255, 105, 180, 0.2);
-      --glass-bg: rgba(255, 255, 255, 0.7);
-      --glass-blur: blur(12px);
+      --primary-color: #ff6b8f; /* 主粉色，鮮明且富有奢華感 */
+      --secondary-color: #ffd1e5; /* 淡粉色背景，更加柔和 */
+      --accent-color: #f79c8e; /* 中等深度的粉色，提供層次感 */
+      --gradient: linear-gradient(135deg, #ff9db8, #ff6b8f); /* 粉色漸變 */
+      --shadow: 0 16px 48px rgba(255, 105, 180, 0.2); /* 更深層次陰影 */
+      --glass-bg: rgba(255, 255, 255, 0.8); /* 半透明玻璃背景 */
+      --glass-blur: blur(15px); /* 背景模糊 */
+      --font-family: 'Montserrat', sans-serif; /* 現代、優雅字體 */
+      --font-heading: 'Lora', serif; /* 奢華風格標題字體 */
     }
   
     @keyframes fadeInUp {
       0% {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(60px);
       }
       100% {
         opacity: 1;
@@ -28,43 +30,60 @@
     }
   
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #ffe6f0, #fff0f5);
+      font-family: var(--font-family);
+      background: linear-gradient(135deg, #ffd1e5, #ffe9f2); /* 粉色漸變背景 */
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      color: #4a4a4a;
     }
   
     .container {
-      animation: fadeInUp 0.8s ease-out;
+      animation: fadeInUp 1s ease-out;
       background: var(--glass-bg);
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
-      padding: 2.5rem;
-      border-radius: 1.5rem;
+      padding: 3rem;
+      border-radius: 2rem;
       box-shadow: var(--shadow);
-      width: 500px;
-      border: 1px solid rgba(255, 192, 203, 0.2);
+      width: 700px;
+      border: 1px solid rgba(255, 192, 203, 0.3);
+      box-sizing: border-box;
     }
   
     h1 {
       text-align: center;
       color: var(--primary-color);
-      font-size: 1.8rem;
-      margin-bottom: 1.2rem;
+      font-family: var(--font-heading);
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      letter-spacing: 2px;
+      line-height: 1.3;
+    }
+  
+    h2 {
+      text-align: center;
+      color: var(--accent-color);
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      letter-spacing: 1.5px;
     }
   
     input, button, textarea {
       width: 100%;
-      padding: 0.75rem;
-      margin: 0.6rem 0;
-      border-radius: 0.75rem;
-      border: 1px solid var(--border-color);
-      font-size: 1rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 1.5rem;
+      border: 1px solid var(--accent-color);
+      font-size: 1.2rem;
       background-color: white;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.3s, box-shadow 0.3s ease;
+      box-sizing: border-box;
     }
   
     input:focus, textarea:focus {
@@ -80,35 +99,43 @@
       border: none;
       cursor: pointer;
       transition: background 0.3s ease, transform 0.2s ease;
+      border-radius: 2rem;
+      padding: 1.5rem;
+      font-size: 1.3rem;
+      width: 100%;
     }
   
     button:hover {
       background: linear-gradient(135deg, #ff80b3, #e05590);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
     }
   
+    /* 表格樣式 */
     table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      margin-top: 1rem;
+      margin-top: 1.5rem;
       background: white;
-      border-radius: 0.75rem;
-      overflow: hidden;
+      border-radius: 1rem;
       box-shadow: var(--shadow);
-      animation: fadeInUp 0.8s ease-out 0.2s both;
+      animation: fadeInUp 1s ease-out 0.3s both;
     }
   
     th, td {
-      padding: 1rem;
+      padding: 1.5rem;
       text-align: center;
-      border-bottom: 1px solid #ffe0eb;
+      border-bottom: 1px solid #ffd6e7;
     }
   
     th {
       background-color: #fff0f7;
-      color: #d94f8b;
+      color: var(--primary-color);
       font-weight: bold;
+    }
+  
+    tbody tr:hover {
+      background-color: #ffe9f2;
     }
   
     .link-button {
@@ -117,42 +144,43 @@
       color: var(--primary-color);
       text-decoration: underline;
       cursor: pointer;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
   
     .back-to-home-btn {
       position: fixed;
-      top: 16px;
-      right: 16px;
+      top: 24px;
+      right: 24px;
       background: var(--gradient);
       color: white;
-      padding: 10px 20px;
-      font-size: 14px;
+      padding: 14px 28px;
+      font-size: 16px;
       font-weight: bold;
-      border-radius: 999px;
+      border-radius: 50px;
       text-decoration: none;
       box-shadow: var(--shadow);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
       z-index: 9999;
-      animation: fadeInUp 0.6s ease-out 0.4s both;
     }
   
     .back-to-home-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(255, 105, 180, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px rgba(255, 105, 180, 0.3);
     }
   
     @media (max-width: 600px) {
       .container {
         width: 90%;
-        padding: 1.5rem;
+        padding: 2.5rem;
       }
       .back-to-home-btn {
-        font-size: 12px;
-        padding: 8px 14px;
+        font-size: 14px;
+        padding: 12px 22px;
       }
     }
   </style>
+  
+  
   
 </head>
 <body>
