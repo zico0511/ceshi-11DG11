@@ -118,28 +118,62 @@
     
     <p style="text-align: center;">還沒有帳號？<a href="register.html" class="link-button">立即註冊</a></p>
   </div>
+  
+  <!-- ✅ Firebase v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <script>
+    // ✅ Firebase 設定
+    var firebaseConfig = {
+      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+      authDomain: "dg11-c954c.firebaseapp.com",
+      projectId: "dg11-c954c",
+      storageBucket: "dg11-c954c.appspot.com",
+      messagingSenderId: "1010585577335",
+      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+    };
+  
+    // 初始化 Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  
     // 登入表單提交事件
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
-
+  
       const username = document.getElementById('loginUsername').value;
       const password = document.getElementById('loginPassword').value;
-
-      // 從 localStorage 讀取已註冊的用戶
-      let users = JSON.parse(localStorage.getItem('users')) || [];
-      
-      const user = users.find(u => u.username === username && u.password === password);
-
-      if (user) {
-        localStorage.setItem('loggedInUser', user.username);  // 儲存登入的用戶ID
-        alert('登入成功！');
-        window.location.href = 'home.html'; // 登入成功後跳轉到主頁
-      } else {
-        alert('帳號或密碼錯誤！');
-      }
+  
+      // 查詢 Firestore 中的用戶資料
+      db.collection("users").where("username", "==", username)
+        .get()
+        .then((querySnapshot) => {
+          if (querySnapshot.empty) {
+            alert("找不到此用戶名，請註冊帳號");
+            return;
+          }
+  
+          // 取得用戶資料
+          const userDoc = querySnapshot.docs[0];
+          const userData = userDoc.data();
+  
+          // 檢查密碼是否正確
+          if (userData.password === password) {
+            sessionStorage.setItem('loggedInUserId', userDoc.id);
+            alert("登入成功！");
+            localStorage.setItem('loggedInUser', username);  // 儲存登入的用戶名
+            window.location.href = 'home.html'; // 登入成功後跳轉到主頁
+          } else {
+            alert("密碼錯誤！");
+          }
+        })
+        .catch((error) => {
+          console.error("登入錯誤：", error);
+          alert("登入失敗，請稍後再試");
+        });
     });
   </script>
+
 </body>
 </html>
