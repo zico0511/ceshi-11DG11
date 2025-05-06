@@ -203,7 +203,7 @@
     const db = firebase.firestore();
     const tableBody = document.getElementById("blacklistItems");
   
-    // ✅ 檢查登入狀態與權限
+    // ✅ 檢查登入狀態
     window.addEventListener('DOMContentLoaded', () => {
       const userId = sessionStorage.getItem('loggedInUserId');
   
@@ -229,7 +229,7 @@
           // 顯示使用者名稱
           document.getElementById('user-id').textContent = `已登入：${userData.username}`;
   
-          // ✅ 登入且為 admin，載入黑名單列表
+          // ✅ 已登入者載入黑名單列表
           renderList();
         })
         .catch((err) => {
@@ -283,6 +283,7 @@
       }
     }
   </script>
+  
   <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
 </body>
 </html>
