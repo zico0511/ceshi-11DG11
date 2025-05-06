@@ -142,8 +142,13 @@
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
   
-      const username = document.getElementById('loginUsername').value;
-      const password = document.getElementById('loginPassword').value;
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+  
+      if (!username || !password) {
+        alert("請輸入帳號和密碼");
+        return;
+      }
   
       // 查詢 Firestore 中的用戶資料
       db.collection("users").where("username", "==", username)
@@ -154,16 +159,26 @@
             return;
           }
   
-          // 取得用戶資料
           const userDoc = querySnapshot.docs[0];
           const userData = userDoc.data();
   
-          // 檢查密碼是否正確
           if (userData.password === password) {
-            sessionStorage.setItem('loggedInUserId', userDoc.id);
-            alert("登入成功！");
-            localStorage.setItem('loggedInUser', username);  // 儲存登入的用戶名
-            window.location.href = 'home.html'; // 登入成功後跳轉到主頁
+            const userId = userDoc.id;
+  
+            // ✅ 將使用者登入狀態更新為 true
+            db.collection("users").doc(userId).update({
+              loggedIn: true
+            }).then(() => {
+              // 儲存登入資訊
+              sessionStorage.setItem('loggedInUserId', userId);
+              localStorage.setItem('loggedInUser', username);
+  
+              alert("登入成功！");
+              window.location.href = 'home.html'; // ✅ 如需直接進入黑名單頁面，改成 'blacklist.html'
+            }).catch((err) => {
+              console.error("更新登入狀態失敗", err);
+              alert("登入狀態更新失敗");
+            });
           } else {
             alert("密碼錯誤！");
           }
@@ -174,6 +189,7 @@
         });
     });
   </script>
+  
 
 </body>
 </html>
