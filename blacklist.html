@@ -204,6 +204,44 @@
     const db = firebase.firestore();
     const tableBody = document.getElementById("blacklistItems");
 
+      // 在頁面載入後執行
+  window.addEventListener('DOMContentLoaded', function() {
+    const userId = sessionStorage.getItem('loggedInUserId');  // 從 sessionStorage 獲取用戶 ID
+
+    if (!userId) {
+      // 如果用戶未登入，跳轉到登入頁面
+      window.location.href = 'login.html';  // 替換成你的登入頁面
+    } else {
+      // 從 Firestore 查詢用戶資料
+      db.collection('users').doc(userId).get()
+        .then((doc) => {
+          if (doc.exists) {
+            const userData = doc.data();
+
+            // 檢查用戶是否已登入（根據 Firestore 中的 loggedIn 欄位）
+            if (!userData.loggedIn) {
+              // 用戶未登入，跳轉到其他頁面
+              window.location.href = 'login.html';  // 替換成登入頁面
+            } else {
+              // 如果是管理員用戶（假設有角色欄位）
+              if (userData.role !== 'admin') {
+                window.location.href = 'home.html';  // 跳轉到首頁
+              } else {
+                // 如果是已登入且有管理員權限的用戶，顯示頁面
+                document.getElementById('user-id').textContent = `已登入：${userData.username}`;
+              }
+            }
+          } else {
+            window.location.href = 'login.html';  // 用戶資料不存在，跳轉到登入頁面
+          }
+        })
+        .catch((error) => {
+          console.error("查詢錯誤：", error);
+          window.location.href = 'login.html';  // 查詢錯誤，跳轉到登入頁面
+        });
+    }
+  });
+
     // 監聽並顯示列表
     function renderList() {
       db.collection("blacklist").orderBy("time", "desc").onSnapshot(snapshot => {
@@ -249,6 +287,13 @@
       if (confirm("確定要刪除這筆資料嗎？")) {
         db.collection("blacklist").doc(id).delete();
       }
+    }
+
+     // 登出函式
+     function logout() {
+      sessionStorage.removeItem('loggedInUserId');  // 清除登入資訊
+      // 登出後跳轉到登入頁面
+      window.location.href = 'login.html';  // 替換成你的登入頁面
     }
   </script>
   <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
