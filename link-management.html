@@ -13,53 +13,54 @@
       margin: 0;
       padding: 0;
     }
-
+  
     body {
-      background: linear-gradient(to right, #ffe0ec, #ffeaf3);
+      background: linear-gradient(to right, #f6e2f3, #fce4f1); /* 粉色漸變 */
       color: #333;
       padding: 40px 20px;
       min-height: 100vh;
-      animation: fadeIn 1.2s ease-out both;
+      font-size: 16px;
+      animation: fadeIn 1s ease-out both;
     }
-
+  
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
+  
     .container {
       max-width: 800px;
       margin: auto;
       background: #fff;
       padding: 40px;
       border-radius: 24px;
-      box-shadow: 0 12px 40px rgba(255, 105, 180, 0.15);
+      box-shadow: 0 12px 40px rgba(255, 182, 193, 0.1);
       animation: slideUp 0.8s ease-out both;
     }
-
+  
     @keyframes slideUp {
       from { transform: translateY(40px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
-
+  
     h1, h2 {
       color: #e84393;
-      margin-bottom: 20px;
       font-weight: 700;
+      margin-bottom: 20px;
       text-align: center;
     }
-
+  
     form {
       display: grid;
-      gap: 16px;
+      gap: 18px;
       margin-bottom: 32px;
     }
-
+  
     label {
       font-weight: 600;
       color: #d63076;
     }
-
+  
     input[type="text"],
     input[type="url"] {
       padding: 12px;
@@ -69,13 +70,13 @@
       background-color: #fff0f6;
       transition: 0.3s ease;
     }
-
+  
     input:focus {
       border-color: #ff5fa2;
       outline: none;
       background-color: #ffe9f2;
     }
-
+  
     .button {
       background: linear-gradient(135deg, #ff6fae, #ff92c2);
       color: white;
@@ -88,12 +89,12 @@
       transition: 0.3s ease;
       box-shadow: 0 6px 20px rgba(255, 105, 180, 0.3);
     }
-
+  
     .button:hover {
       background: linear-gradient(135deg, #ff84bc, #ffa1d0);
       transform: translateY(-2px) scale(1.02);
     }
-
+  
     table {
       width: 100%;
       border-collapse: collapse;
@@ -103,23 +104,23 @@
       box-shadow: 0 4px 20px rgba(255, 182, 193, 0.15);
       margin-top: 20px;
     }
-
+  
     th, td {
       padding: 14px 18px;
       text-align: left;
       border-bottom: 1px solid #ffd6e7;
     }
-
+  
     th {
       background-color: #ffe0ec;
       color: #e84393;
       font-weight: 600;
     }
-
+  
     tbody tr:hover {
       background-color: #ffe9f2;
     }
-
+  
     .action-btn {
       background: #ff6b9e;
       color: white;
@@ -130,11 +131,11 @@
       cursor: pointer;
       transition: 0.3s ease;
     }
-
+  
     .action-btn:hover {
       background: #e7518c;
     }
-
+  
     .back-to-home-btn {
       position: fixed;
       top: 20px;
@@ -150,59 +151,115 @@
       z-index: 1000;
       transition: all 0.3s ease;
     }
-
+  
     .back-to-home-btn:hover {
       transform: translateY(-3px);
       box-shadow: 0 12px 24px rgba(255, 105, 180, 0.5);
     }
-
+  
     hr {
       margin: 30px 0;
       border: none;
       border-top: 1px solid #ffd6e7;
     }
-
+  
     /* 新增動畫效果 */
     .fade-in {
       animation: fadeInRow 0.5s ease forwards;
     }
+  
     @keyframes fadeInRow {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-       /* 新增表格樣式修正 */
-       table {
+  
+    /* 新增表格樣式修正 */
+    table {
       table-layout: fixed; /* 固定表格佈局 */
       width: 100%;
     }
-    
+  
     /* 設定各欄位寬度 */
     th:nth-child(1), td:nth-child(1) {
       width: 20%; /* 網址名稱欄位 */
     }
-    
+  
     th:nth-child(2), td:nth-child(2) {
       width: 65%; /* 網址欄位 */
       word-break: break-all; /* 強制換行 */
       overflow-wrap: break-word; /* 長單字換行 */
     }
-    
+  
     th:nth-child(3), td:nth-child(3) {
       width: 15%; /* 操作欄位 */
     }
-    
+  
     /* 網址連結樣式 */
     td a {
       color: #1a73e8; /* Google藍色 */
       text-decoration: none;
       transition: all 0.3s;
     }
-    
+  
     td a:hover {
       color: #0d5bca; /* 深藍色 */
       text-decoration: underline;
     }
+  
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+      .container {
+        padding: 30px;
+        width: 90%;
+      }
+  
+      h1 {
+        font-size: 2rem;
+      }
+  
+      .back-to-home-btn {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+  
+      .action-btn {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+  
+      input[type="text"],
+      input[type="url"] {
+        font-size: 14px;
+        padding: 10px;
+      }
+  
+      table {
+        font-size: 14px;
+      }
+    }
+  
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+  
+      .back-to-home-btn {
+        font-size: 13px;
+        padding: 6px 12px;
+      }
+  
+      .action-btn {
+        font-size: 10px;
+        padding: 4px 8px;
+      }
+  
+      table {
+        font-size: 12px;
+      }
+    }
   </style>
+  
+  
 </head>
 <body>
   <div class="container">
