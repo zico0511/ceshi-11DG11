@@ -124,56 +124,71 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <script>
-    // ✅ Firebase 設定
-    var firebaseConfig = {
-      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
-      authDomain: "dg11-c954c.firebaseapp.com",
-      projectId: "dg11-c954c",
-      storageBucket: "dg11-c954c.appspot.com",
-      messagingSenderId: "1010585577335",
-      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
-    };
-  
-    // 初始化 Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-  
-    // 登入表單提交事件
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-  
-      const username = document.getElementById('loginUsername').value;
-      const password = document.getElementById('loginPassword').value;
-  
-      // 查詢 Firestore 中的用戶資料
-      db.collection("users").where("username", "==", username)
-        .get()
-        .then((querySnapshot) => {
-          if (querySnapshot.empty) {
-            alert("找不到此用戶名，請註冊帳號");
-            return;
-          }
-  
-          // 取得用戶資料
-          const userDoc = querySnapshot.docs[0];
-          const userData = userDoc.data();
-  
-          // 檢查密碼是否正確
-          if (userData.password === password) {
-            sessionStorage.setItem('loggedInUserId', userDoc.id);
-            alert("登入成功！");
-            localStorage.setItem('loggedInUser', username);  // 儲存登入的用戶名
-            window.location.href = 'home.html'; // 登入成功後跳轉到主頁
-          } else {
-            alert("密碼錯誤！");
-          }
-        })
-        .catch((error) => {
-          console.error("登入錯誤：", error);
-          alert("登入失敗，請稍後再試");
+// Firebase 設定
+var firebaseConfig = {
+  apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+  authDomain: "dg11-c954c.firebaseapp.com",
+  projectId: "dg11-c954c",
+  storageBucket: "dg11-c954c.firebasestorage.app",
+  messagingSenderId: "1010585577335",
+  appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+};
+
+// 初始化 Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// 登入表單提交事件
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+
+  if (!username || !password) {
+    alert("請輸入帳號和密碼");
+    return;
+  }
+
+  // 查詢 Firestore 中的用戶資料
+  db.collection("users").where("username", "==", username)
+    .get()
+    .then((querySnapshot) => {
+      if (querySnapshot.empty) {
+        alert("找不到此用戶名，請註冊帳號");
+        return;
+      }
+
+      const userDoc = querySnapshot.docs[0];
+      const userData = userDoc.data();
+
+      if (userData.password === password) {
+        const userId = userDoc.id;
+
+        // 更新登入狀態為 true
+        db.collection("users").doc(userId).update({
+          loggedIn: true
+        }).then(() => {
+          sessionStorage.setItem('loggedInUserId', userId);
+          localStorage.setItem('loggedInUser', username);
+
+          alert("登入成功！");
+          window.location.href = 'home.html'; // 進入主頁
+        }).catch((err) => {
+          console.error("更新登入狀態失敗", err);
+          alert("登入狀態更新失敗");
         });
+      } else {
+        alert("密碼錯誤！");
+      }
+    })
+    .catch((error) => {
+      console.error("登入錯誤：", error);
+      alert("登入失敗，請稍後再試");
     });
+});
   </script>
+  
 
 </body>
 </html>
