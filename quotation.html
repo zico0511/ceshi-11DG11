@@ -309,17 +309,26 @@
     <div class="container my-5">
         <div class="row">
             <div class="col-lg-8 mx-auto">
-                <!-- 匯率查詢連結 -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        匯率查詢
-                    </div>
-                    <div class="card-body">
-                        <a href="https://www.google.com/search?q=%E5%8F%B0%E5%B9%A3%E9%9F%93%E5%85%83%E5%8C%AF%E7%8E%87&rlz=1C1CHBF_zh-TWTW1088TW1088&oq=&gs_lcrp=EgZjaHJvbWUqCQgAECMYJxjqAjIJCAAQIxgnGOoCMgkIARAjGCcY6gIyCQgCECMYJxjqAjIJCAMQIxgnGOoCMgkIBBAjGCcY6gIyCQgFEC4YJxjqAjIJCAYQIxgnGOoCMgkIBxAjGCcY6gLSAQg0MzcxajBqN6gCCLACAfEFJEEPcz8wgwvxBSRBD3M_MIML&sourceid=chrome&ie=UTF-8" target="_blank" class="btn btn-outline-primary currency-link">
-                            <i class="fas fa-exchange-alt me-1"></i> XE 匯率查詢
-                        </a>
-                    </div>
-                </div>
+  <!-- 匯率查詢連結 -->
+  <div class="card mb-4">
+    <div class="card-header">
+        匯率查詢
+    </div>
+    <div class="card-body">
+      <a href="https://www.google.com/search?q=台幣韓元匯率" target="_blank" class="btn btn-outline-primary currency-link">
+        <i class="fas fa-exchange-alt me-1"></i> 韓幣匯率查詢
+      </a>
+      <a href="https://www.google.com/search?q=日元台幣匯率" target="_blank" class="btn btn-outline-primary currency-link ms-2">
+        <i class="fas fa-exchange-alt me-1"></i> 日元匯率查詢
+      </a>
+      <a href="https://www.google.com/search?q=人民幣台幣匯率" target="_blank" class="btn btn-outline-primary currency-link ms-2">
+        <i class="fas fa-exchange-alt me-1"></i> 人民幣匯率查詢
+      </a>
+      <a href="https://www.google.com/search?q=美元台幣匯率" target="_blank" class="btn btn-outline-primary currency-link ms-2">
+        <i class="fas fa-exchange-alt me-1"></i> 美元匯率查詢
+      </a>
+    </div>
+</div>
 
                 <!-- 主表單 -->
                 <div class="card mb-4" id="quotation-section">
@@ -494,27 +503,28 @@
   <a href="home.html" class="return-home-btn">🏠 返回主頁</a>
 <!-- Firebase SDK -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      getDocs,
-      deleteDoc,
-      doc,
-      query,
-      where,
-      orderBy
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import {
-      getStorage,
-      ref,
-      uploadBytes,
-      getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-    import html2canvas from "https://cdn.skypack.dev/html2canvas";
-  
-    const firebaseConfig = {
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc,
+    getDoc,
+    query,
+    where,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import html2canvas from "https://cdn.skypack.dev/html2canvas";
+
+  const firebaseConfig = {
   apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
   authDomain: "dg11-c954c.firebaseapp.com",
   projectId: "dg11-c954c",
@@ -522,230 +532,290 @@
   messagingSenderId: "1010585577335",
   appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
 };
-  
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-    const quotesCollection = collection(db, "quotations");
-    let selectedImageFile = null;
-  
-    document.addEventListener("DOMContentLoaded", () => {
-      const productImageInput = document.getElementById('productImage');
-      const imagePreview = document.getElementById('imagePreview');
-      const resultImagePreview = document.getElementById('resultImagePreview');
-  
-      productImageInput.addEventListener('change', function (e) {
-        selectedImageFile = e.target.files[0];
-        if (selectedImageFile) {
-          const reader = new FileReader();
-          reader.onload = function (event) {
-            imagePreview.src = event.target.result;
-            imagePreview.style.display = 'block';
-            resultImagePreview.src = event.target.result;
-          };
-          reader.readAsDataURL(selectedImageFile);
-        }
-      });
-  
-      const quotationForm = document.getElementById('quotationForm');
-      const resultContainer = document.getElementById('resultContainer');
-      const saveRecordBtn = document.getElementById('saveRecordBtn');
-  
-      quotationForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        calculateQuotation();
-      });
-  
-      async function calculateQuotation() {
-        const productId = document.getElementById('productId').value;
-        const productName = document.getElementById('productName').value;
-        const productCategory = document.getElementById('productCategory').value;
-        const productCost = parseFloat(document.getElementById('productCost').value);
-        const costCurrency = document.getElementById('costCurrency').value;
-        let productWeight = parseFloat(document.getElementById('productWeight').value);
-        const weightUnit = document.getElementById('weightUnit').value;
-        const internationalShipping = parseFloat(document.getElementById('internationalShipping').value);
-        const serviceFeePercent = parseFloat(document.getElementById('serviceFeePercent').value);
-        const additionalServiceFee = parseFloat(document.getElementById('additionalServiceFee').value) || 0;
-        const exchangeRate = parseFloat(document.getElementById('exchangeRate').value);
-  
-        if (weightUnit === 'kg') {
-          productWeight *= 1000;
-        }
-  
-        // ✅ 新公式：
-        // [商品成本 × (1 + 代付百分比) / 匯率 + 商品重量 × 國際運費] + 服務費
-        const costWithPercent = productCost * (1 + serviceFeePercent);
-        const convertedCost = costWithPercent / exchangeRate;
-        const shippingFee = productWeight * internationalShipping;
-        const totalBeforeService = convertedCost + shippingFee;
-        const totalPrice = totalBeforeService + additionalServiceFee;
-  
-        const now = new Date();
-  
-        document.getElementById('resultProductId').textContent = productId;
-        document.getElementById('resultProductName').textContent = productName;
-        document.getElementById('resultProductCategory').textContent = productCategory;
-        document.getElementById('resultProductCost').textContent = `${productCost.toFixed(2)} ${costCurrency}`;
-        document.getElementById('resultProductWeight').textContent = `${productWeight.toFixed(2)}g`;
-        document.getElementById('resultShippingFee').textContent = `NT$ ${shippingFee.toFixed(2)}`;
-        document.getElementById('resultTotalPrice').textContent = `NT$ ${totalPrice.toFixed(2)}`;
-        document.getElementById('calculationTime').textContent = now.toLocaleString();
-        resultContainer.style.display = 'block';
-  
-        saveRecordBtn.onclick = () => {
-          saveQuotationToFirestore({
-            productId,
-            productName,
-            productCategory,
-            productCost,
-            costCurrency,
-            productWeight,
-            internationalShipping,
-            serviceFeePercent,
-            additionalServiceFee,
-            exchangeRate,
-            totalPrice,
-            timestamp: now.getTime(),
-            dateString: now.toLocaleString()
-          });
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+  const quotesCollection = collection(db, "quotations");
+  let selectedImageFile = null;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const productImageInput = document.getElementById('productImage');
+    const imagePreview = document.getElementById('imagePreview');
+    const resultImagePreview = document.getElementById('resultImagePreview');
+
+    productImageInput.addEventListener('change', function (e) {
+      selectedImageFile = e.target.files[0];
+      if (selectedImageFile) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          imagePreview.src = event.target.result;
+          imagePreview.style.display = 'block';
+          resultImagePreview.src = event.target.result;
+          resultImagePreview.style.display = 'block';
         };
+        reader.readAsDataURL(selectedImageFile);
       }
-  
-      async function saveQuotationToFirestore(quotation) {
-        try {
-          let imageUrl = '';
-          if (selectedImageFile) {
-            const storageRef = ref(storage, `quotation_images/${Date.now()}_${selectedImageFile.name}`);
-            const snapshot = await uploadBytes(storageRef, selectedImageFile);
-            imageUrl = await getDownloadURL(snapshot.ref);
-          }
-  
-          const fullData = { ...quotation, imageUrl };
-          await addDoc(quotesCollection, fullData);
-          alert("報價已成功保存到雲端！");
-          loadHistory();
-        } catch (error) {
-          console.error("保存報價時出錯:", error);
-          alert("保存失敗: " + error.message);
+    });
+
+    const quotationForm = document.getElementById('quotationForm');
+    const resultContainer = document.getElementById('resultContainer');
+    const saveRecordBtn = document.getElementById('saveRecordBtn');
+
+    quotationForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      calculateQuotation();
+    });
+
+    async function calculateQuotation(overrideData = null) {
+      const productId = document.getElementById('productId').value;
+      const productName = document.getElementById('productName').value;
+      const productCategory = document.getElementById('productCategory').value;
+      const productCost = parseFloat(document.getElementById('productCost').value);
+      const costCurrency = document.getElementById('costCurrency').value;
+      let productWeight = parseFloat(document.getElementById('productWeight').value);
+      const weightUnit = document.getElementById('weightUnit').value;
+      const internationalShipping = parseFloat(document.getElementById('internationalShipping').value);
+      const serviceFeePercent = parseFloat(document.getElementById('serviceFeePercent').value);
+      const additionalServiceFee = parseFloat(document.getElementById('additionalServiceFee').value) || 0;
+      const exchangeRate = parseFloat(document.getElementById('exchangeRate').value);
+
+      if (weightUnit === 'kg') {
+        productWeight *= 1000;
+      }
+
+      const costWithPercent = productCost * (1 + serviceFeePercent);
+      const convertedCost = costWithPercent / exchangeRate;
+      const shippingFee = productWeight * internationalShipping;
+      const totalBeforeService = convertedCost + shippingFee;
+      const totalPrice = totalBeforeService + additionalServiceFee;
+
+      const now = new Date();
+
+      document.getElementById('resultProductId').textContent = productId;
+      document.getElementById('resultProductName').textContent = productName;
+      document.getElementById('resultProductCategory').textContent = productCategory;
+      document.getElementById('resultProductCost').textContent = `${productCost.toFixed(2)} ${costCurrency}`;
+      document.getElementById('resultProductWeight').textContent = `${productWeight.toFixed(2)}g`;
+      document.getElementById('resultShippingFee').textContent = `NT$ ${shippingFee.toFixed(2)}`;
+      document.getElementById('resultTotalPrice').textContent = `NT$ ${totalPrice.toFixed(2)}`;
+      document.getElementById('calculationTime').textContent = now.toLocaleString();
+
+      if (overrideData?.imageUrl) {
+        resultImagePreview.src = overrideData.imageUrl;
+        resultImagePreview.style.display = 'block';
+      }
+
+      resultContainer.style.display = 'block';
+
+      saveRecordBtn.onclick = () => {
+        saveQuotationToFirestore({
+          productId,
+          productName,
+          productCategory,
+          productCost,
+          costCurrency,
+          productWeight,
+          internationalShipping,
+          serviceFeePercent,
+          additionalServiceFee,
+          exchangeRate,
+          totalPrice,
+          timestamp: now.getTime(),
+          dateString: now.toLocaleString()
+        });
+      };
+    }
+
+    async function saveQuotationToFirestore(quotation) {
+      try {
+        let imageUrl = '';
+        if (selectedImageFile) {
+          const storageRef = ref(storage, `quotation_images/${Date.now()}_${selectedImageFile.name}`);
+          const snapshot = await uploadBytes(storageRef, selectedImageFile);
+          imageUrl = await getDownloadURL(snapshot.ref);
         }
+
+        const fullData = { ...quotation, imageUrl };
+        await addDoc(quotesCollection, fullData);
+        alert("報價已成功保存到雲端！");
+        loadHistory();
+      } catch (error) {
+        console.error("保存報價時出錯:", error);
+        alert("保存失敗: " + error.message);
       }
-  
-      async function loadHistory(searchTerm = '') {
-        try {
-          let q;
-          if (searchTerm) {
-            q = query(
-              quotesCollection,
-              where("productId", ">=", searchTerm),
-              where("productId", "<=", searchTerm + '\uf8ff'),
-              orderBy("timestamp", "desc")
-            );
-          } else {
-            q = query(quotesCollection, orderBy("timestamp", "desc"));
-          }
-  
-          const snapshot = await getDocs(q);
-          const historyList = document.getElementById('historyList');
-          historyList.innerHTML = '';
-  
-          if (snapshot.empty) {
-            historyList.innerHTML = '<p class="text-muted text-center">沒有歷史記錄</p>';
-            return;
-          }
-  
-          snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            const historyItem = document.createElement('div');
-            historyItem.className = 'col-md-6';
-            historyItem.innerHTML = `
-              <div class="history-item">
-                <div class="d-flex justify-content-between align-items-start">
-                  <div>
-                    <h6>${data.productName || '未命名商品'}</h6>
-                    <p class="mb-1"><small class="text-muted">編號: ${data.productId || '無'}</small></p>
-                  </div>
+    }
+
+    async function loadHistory(searchTerm = '') {
+      try {
+        let q;
+        if (searchTerm) {
+          q = query(
+            quotesCollection,
+            where("productId", ">=", searchTerm),
+            where("productId", "<=", searchTerm + '\uf8ff'),
+            orderBy("timestamp", "desc")
+          );
+        } else {
+          q = query(quotesCollection, orderBy("timestamp", "desc"));
+        }
+
+        const snapshot = await getDocs(q);
+        const historyList = document.getElementById('historyList');
+        historyList.innerHTML = '';
+
+        if (snapshot.empty) {
+          historyList.innerHTML = '<p class="text-muted text-center">沒有歷史記錄</p>';
+          return;
+        }
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const historyItem = document.createElement('div');
+          historyItem.className = 'col-md-6';
+          historyItem.innerHTML = `
+            <div class="history-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h6>${data.productName || '未命名商品'}</h6>
+                  <p class="mb-1"><small class="text-muted">編號: ${data.productId || '無'}</small></p>
+                </div>
+                <div>
+                  <button class="btn btn-sm btn-primary view-history" data-id="${docSnap.id}">查看</button>
                   <button class="btn btn-sm btn-outline-danger delete-history" data-id="${docSnap.id}">
                     <i class="fas fa-trash-alt"></i>
                   </button>
                 </div>
-                <div class="mt-2">
-                  <p class="mb-1"><strong>類別:</strong> ${data.productCategory || '未分類'}</p>
-                  <p class="mb-1"><strong>成本:</strong> ${data.productCost?.toFixed(2) || '0.00'} ${data.costCurrency || ''}</p>
-                  <p class="mb-1"><strong>重量:</strong> ${data.productWeight?.toFixed(2) || '0.00'}g</p>
-                  <p class="mb-1"><strong>總價:</strong> NT$ ${data.totalPrice?.toFixed(2) || '0.00'}</p>
-                  <p class="mb-0"><small class="text-muted">${data.dateString || ''}</small></p>
-                </div>
-                ${data.imageUrl ? `<img src="${data.imageUrl}" class="img-thumbnail mt-2" style="max-height: 100px;">` : ''}
               </div>
-            `;
-            historyList.appendChild(historyItem);
-          });
-  
-          document.querySelectorAll('.delete-history').forEach(button => {
-            button.addEventListener('click', async function () {
-              const id = this.getAttribute('data-id');
-              if (confirm('確定要刪除此記錄嗎？')) {
-                try {
-                  await deleteDoc(doc(db, "quotations", id));
-                  loadHistory(searchTerm);
-                } catch (error) {
-                  console.error("刪除記錄時出錯:", error);
-                  alert("刪除失敗: " + error.message);
-                }
+              <div class="mt-2">
+                <p class="mb-1"><strong>類別:</strong> ${data.productCategory || '未分類'}</p>
+                <p class="mb-1"><strong>成本:</strong> ${data.productCost?.toFixed(2) || '0.00'} ${data.costCurrency || ''}</p>
+                <p class="mb-1"><strong>重量:</strong> ${data.productWeight?.toFixed(2) || '0.00'}g</p>
+                <p class="mb-1"><strong>總價:</strong> NT$ ${data.totalPrice?.toFixed(2) || '0.00'}</p>
+                <p class="mb-0"><small class="text-muted">${data.dateString || ''}</small></p>
+              </div>
+              ${data.imageUrl ? `<img src="${data.imageUrl}" class="img-thumbnail mt-2" style="max-height: 100px;">` : ''}
+            </div>
+          `;
+          historyList.appendChild(historyItem);
+        });
+
+        document.querySelectorAll('.delete-history').forEach(button => {
+          button.addEventListener('click', async function () {
+            const id = this.getAttribute('data-id');
+            if (confirm('確定要刪除此記錄嗎？')) {
+              try {
+                await deleteDoc(doc(db, "quotations", id));
+                loadHistory(searchTerm);
+              } catch (error) {
+                console.error("刪除記錄時出錯:", error);
+                alert("刪除失敗: " + error.message);
               }
-            });
+            }
           });
-  
+        });
+
+        document.querySelectorAll('.view-history').forEach(button => {
+          button.addEventListener('click', async function () {
+            const id = this.getAttribute('data-id');
+            const docRef = doc(db, "quotations", id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              document.getElementById('productId').value = data.productId || '';
+              document.getElementById('productName').value = data.productName || '';
+              document.getElementById('productCategory').value = data.productCategory || '';
+              document.getElementById('productCost').value = data.productCost || '';
+              document.getElementById('costCurrency').value = data.costCurrency || '';
+              document.getElementById('productWeight').value = data.productWeight || '';
+              document.getElementById('weightUnit').value = 'g';
+              document.getElementById('internationalShipping').value = data.internationalShipping || '';
+              document.getElementById('serviceFeePercent').value = data.serviceFeePercent || '';
+              document.getElementById('additionalServiceFee').value = data.additionalServiceFee || '';
+              document.getElementById('exchangeRate').value = data.exchangeRate || '';
+
+              if (data.imageUrl) {
+                resultImagePreview.src = data.imageUrl;
+                resultImagePreview.style.display = 'block';
+              }
+
+              document.getElementById('quotation-tab').click();
+              calculateQuotation(data);
+            }
+          });
+        });
+
+      } catch (error) {
+        console.error("加載歷史記錄時出錯:", error);
+        document.getElementById('historyList').innerHTML = '<p class="text-danger text-center">加載歷史記錄失敗</p>';
+      }
+    }
+
+    // 新增清除所有歷史記錄功能
+    async function clearAllHistory() {
+      if (confirm('確定要刪除所有歷史記錄嗎？此操作無法復原！')) {
+        try {
+          const snapshot = await getDocs(quotesCollection);
+          const deletePromises = [];
+          snapshot.forEach(docSnap => {
+            deletePromises.push(deleteDoc(doc(db, "quotations", docSnap.id)));
+          });
+          await Promise.all(deletePromises);
+          alert('所有歷史記錄已成功刪除！');
+          loadHistory();
         } catch (error) {
-          console.error("加載歷史記錄時出錯:", error);
-          document.getElementById('historyList').innerHTML = '<p class="text-danger text-center">加載歷史記錄失敗</p>';
+          console.error("刪除所有記錄時出錯:", error);
+          alert("刪除失敗: " + error.message);
         }
       }
-  
-      document.getElementById('historySearch')?.addEventListener('input', function () {
-        loadHistory(this.value.trim());
-      });
-  
-      document.getElementById('searchHistoryBtn')?.addEventListener('click', function () {
-        const searchInput = document.getElementById('historySearch');
-        loadHistory(searchInput.value.trim());
-      });
-  
-      document.getElementById('quotation-tab')?.addEventListener('click', function () {
-        document.getElementById('quotation-section').style.display = 'block';
-        document.getElementById('history-section').style.display = 'none';
-        this.classList.add('active');
-        document.getElementById('history-tab').classList.remove('active');
-      });
-  
-      document.getElementById('history-tab')?.addEventListener('click', function () {
-        document.getElementById('quotation-section').style.display = 'none';
-        document.getElementById('history-section').style.display = 'block';
-        this.classList.add('active');
-        document.getElementById('quotation-tab').classList.remove('active');
-        loadHistory();
-      });
-  
-      // 下載報價單功能
-      document.getElementById('downloadQuoteBtn')?.addEventListener('click', async () => {
-        const resultContainer = document.getElementById('resultContainer');
-        if (!resultContainer) return;
-        try {
-          const canvas = await html2canvas(resultContainer);
-          const link = document.createElement("a");
-          link.download = "quotation.png";
-          link.href = canvas.toDataURL("image/png");
-          link.click();
-        } catch (err) {
-          console.error("生成圖片失敗:", err);
-          alert("下載失敗，請稍後再試。");
-        }
-      });
-  
+    }
+
+    // 綁定清除所有歷史記錄按鈕事件
+    document.getElementById('clearAllHistoryBtn')?.addEventListener('click', clearAllHistory);
+
+    document.getElementById('historySearch')?.addEventListener('input', function () {
+      loadHistory(this.value.trim());
+    });
+
+    document.getElementById('searchHistoryBtn')?.addEventListener('click', function () {
+      const searchInput = document.getElementById('historySearch');
+      loadHistory(searchInput.value.trim());
+    });
+
+    document.getElementById('quotation-tab')?.addEventListener('click', function () {
+      document.getElementById('quotation-section').style.display = 'block';
+      document.getElementById('history-section').style.display = 'none';
+      this.classList.add('active');
+      document.getElementById('history-tab').classList.remove('active');
+    });
+
+    document.getElementById('history-tab')?.addEventListener('click', function () {
+      document.getElementById('quotation-section').style.display = 'none';
+      document.getElementById('history-section').style.display = 'block';
+      this.classList.add('active');
+      document.getElementById('quotation-tab').classList.remove('active');
       loadHistory();
     });
-  </script>  
 
+    document.getElementById('downloadQuoteBtn')?.addEventListener('click', async () => {
+      const resultContainer = document.getElementById('resultContainer');
+      if (!resultContainer) return;
+      try {
+        const canvas = await html2canvas(resultContainer);
+        const link = document.createElement("a");
+        link.download = "quotation.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } catch (err) {
+        console.error("生成圖片失敗:", err);
+        alert("下載失敗，請稍後再試。");
+      }
+    });
+
+    loadHistory();
+  });
+</script>
+
+  
 </body>
 </html>
