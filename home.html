@@ -217,46 +217,40 @@
 <body>
 
   <div class="header">
+    <div id="user-id">載入中...</div>
     <button class="logout-btn" onclick="logout()">登出</button>
   </div>
 
   <div class="main-container">
     <h1>歡迎來到 11DG11 系統主頁</h1>
     <p>請選擇以下功能進入</p>
+    
     <div class="menu">
       <button onclick="location.href='quotation.html'">📦 報價計算</button>
       <button onclick="location.href='orders.html'">🧾 訂單管理</button>
       <button onclick="location.href='products.html'">📁 庫存管理</button>
       <button onclick="location.href='report.html'">📊 報表分析</button>
-      <button onclick="location.href='link-management.html'">🔗網址連結管理</button>
+      <button onclick="location.href='link-management.html'">🔗 網址連結管理</button>
       <button onclick="location.href='blacklist.html'">⛔ 黑名單管理</button>
     </div>
+
     <div class="footer">
       <p>© 2025 11DG11 系統 | <a href="xzw.html">隱私政策</a></p>
     </div>
-<!-- 左上角顯示登入 ID -->
-<div id="user-id" class="user-id-box"></div>
-
   </div>
 
-  <script>
-    function logout() {
-      localStorage.removeItem('loggedInUser');
-      window.location.href = 'index.html';
-    }
-  </script>
-
-<!-- Firebase SDK（若頁面還沒引入） -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
-  // ✅ 初始化 Firebase（如果尚未初始化）
+  // ✅ 初始化 Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
     authDomain: "dg11-c954c.firebaseapp.com",
     projectId: "dg11-c954c",
-    storageBucket: "dg11-c954c.appspot.com",
+    storageBucket: "dg11-c954c.firebasestorage.app",
     messagingSenderId: "1010585577335",
     appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
   };
@@ -265,32 +259,45 @@
     firebase.initializeApp(firebaseConfig);
   }
 
+  const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // ✅ 顯示登入用戶資訊
-  window.addEventListener('DOMContentLoaded', function () {
-    const userId = sessionStorage.getItem('loggedInUserId'); // 必須在登入時先存這個 ID
-
-    if (userId) {
-      db.collection('users').doc(userId).get()
-        .then((doc) => {
-          if (doc.exists) {
-            const userData = doc.data();
-            document.getElementById('user-id').textContent = `已登入：${userData.username}`;
-          } else {
-            document.getElementById('user-id').textContent = '找不到使用者';
-          }
-        })
-        .catch((error) => {
-          console.error("查詢錯誤：", error);
-          document.getElementById('user-id').textContent = '讀取失敗';
-        });
-    } else {
-      document.getElementById('user-id').textContent = '尚未登入';
-    }
+  // ✅ 頁面載入後檢查是否登入
+  window.addEventListener('DOMContentLoaded', () => {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // 使用者已登入，從 Firestore 拿資料
+        const userId = user.uid;
+        db.collection('users').doc(userId).get()
+          .then((doc) => {
+            if (doc.exists) {
+              const userData = doc.data();
+              document.getElementById('user-id').textContent = `已登入：${userData.username || user.email}`;
+            } else {
+              document.getElementById('user-id').textContent = '找不到使用者';
+            }
+          })
+          .catch((error) => {
+            console.error("查詢錯誤：", error);
+            document.getElementById('user-id').textContent = '讀取失敗';
+          });
+      } else {
+        // ❌ 未登入，導回登入頁 (index.html)
+        window.location.href = 'index.html';
+      }
+    });
   });
+
+  // ✅ 登出函式
+  function logout() {
+    firebase.auth().signOut().then(() => {
+      window.location.href = 'index.html'; // 登出後跳轉到登入頁 (index.html)
+    }).catch((error) => {
+      console.error("登出失敗：", error);
+    });
+  }
 </script>
+
 
 </body>
 </html>
-
