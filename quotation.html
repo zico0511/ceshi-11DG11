@@ -491,274 +491,253 @@
     </div>
 
   <a href="home.html" class="return-home-btn">🏠 返回主頁</a>
-<!-- Firebase 初始化模組 -->
+<!-- Firebase SDK -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import {
-    getFirestore
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
-    authDomain: "dg11-c954c.firebaseapp.com",
-    projectId: "dg11-c954c",
-    storageBucket: "dg11-c954c.appspot.com",
-    messagingSenderId: "1010585577335",
-    appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
-  };
-
-  try {
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      deleteDoc,
+      doc,
+      query,
+      where,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  
+    // Firebase 配置
+    const firebaseConfig = {
+      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+      authDomain: "dg11-c954c.firebaseapp.com",
+      projectId: "dg11-c954c",
+      storageBucket: "dg11-c954c.appspot.com",
+      messagingSenderId: "1010585577335",
+      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+    };
+  
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    console.log("Firebase 初始化成功");
-
-    // 將 db 曝露到全域 window，供第二段模組使用
-    window.firestoreDB = db;
-  } catch (error) {
-    console.error("Firebase 初始化失敗:", error);
-    alert("應用程式初始化失敗，請刷新頁面或聯繫管理員");
-  }
-</script>
-
-<!-- Firestore 功能與頁面邏輯 -->
-<script type="module">
-  import {
-    collection,
-    addDoc,
-    getDocs,
-    deleteDoc,
-    doc,
-    query,
-    where,
-    orderBy
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    const db = window.firestoreDB;
-    if (!db) {
-      console.error("Firestore 未正確初始化");
-      return;
-    }
-
+    const storage = getStorage(app);
     const quotesCollection = collection(db, "quotations");
-
-    // === 1. 圖片預覽 ===
-    const productImageInput = document.getElementById('productImage');
-    const imagePreview = document.getElementById('imagePreview');
-    const resultImagePreview = document.getElementById('resultImagePreview');
-
-    productImageInput?.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          imagePreview.src = event.target.result;
-          imagePreview.style.display = 'block';
-          resultImagePreview.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    // === 2. 重量單位顯示更新 ===
-    const weightUnitSelect = document.getElementById('weightUnit');
-    const shippingUnitLabel = document.getElementById('shippingUnitLabel');
-
-    weightUnitSelect?.addEventListener('change', function () {
-      shippingUnitLabel.textContent = `/${this.value}`;
-    });
-
-    // === 3. 表單提交與報價計算 ===
-    const quotationForm = document.getElementById('quotationForm');
-    const resultContainer = document.getElementById('resultContainer');
-    const saveRecordBtn = document.getElementById('saveRecordBtn');
-
-    quotationForm?.addEventListener('submit', function (e) {
-      e.preventDefault();
-      calculateQuotation();
-    });
-
-    function calculateQuotation() {
-      const productId = document.getElementById('productId').value;
-      const productName = document.getElementById('productName').value;
-      const productCategory = document.getElementById('productCategory').value;
-      const productCost = parseFloat(document.getElementById('productCost').value);
-      const costCurrency = document.getElementById('costCurrency').value;
-      let productWeight = parseFloat(document.getElementById('productWeight').value);
-      const weightUnit = document.getElementById('weightUnit').value;
-      const internationalShipping = parseFloat(document.getElementById('internationalShipping').value);
-      const serviceFeePercent = parseFloat(document.getElementById('serviceFeePercent').value);
-      const additionalServiceFee = parseFloat(document.getElementById('additionalServiceFee').value) || 0;
-
-      if (weightUnit === 'kg') {
-        productWeight *= 1000;
-      }
-
-      const shippingFee = productWeight * internationalShipping;
-      const totalCost = productCost + shippingFee;
-      const serviceFee = totalCost * serviceFeePercent + additionalServiceFee;
-      const totalPrice = totalCost + serviceFee;
-
-      const now = new Date();
-
-      // 顯示結果
-      document.getElementById('resultProductId').textContent = productId;
-      document.getElementById('resultProductName').textContent = productName;
-      document.getElementById('resultProductCategory').textContent = productCategory;
-      document.getElementById('resultProductCost').textContent = `${productCost.toFixed(2)} ${costCurrency}`;
-      document.getElementById('resultProductWeight').textContent = `${productWeight.toFixed(2)}g`;
-      document.getElementById('resultShippingFee').textContent = `NT$ ${shippingFee.toFixed(2)}`;
-      document.getElementById('resultTotalPrice').textContent = `NT$ ${totalPrice.toFixed(2)}`;
-      document.getElementById('calculationTime').textContent = now.toLocaleString();
-
-      resultContainer.style.display = 'block';
-
-      saveRecordBtn.onclick = () => {
-        saveQuotationToFirestore({
-          productId,
-          productName,
-          productCategory,
-          productCost,
-          costCurrency,
-          productWeight,
-          internationalShipping,
-          serviceFeePercent,
-          additionalServiceFee,
-          totalPrice,
-          imageUrl: imagePreview.src || '',
-          timestamp: now.getTime(),
-          dateString: now.toLocaleString()
-        });
-      };
-    }
-
-    async function saveQuotationToFirestore(quotation) {
-      try {
-        const docRef = await addDoc(quotesCollection, quotation);
-        console.log("報價已保存，文檔ID:", docRef.id);
-        alert('報價已成功保存到雲端！');
-        loadHistory();
-      } catch (error) {
-        console.error("保存報價時出錯:", error);
-        alert(`保存失敗: ${error.message}`);
-      }
-    }
-
-    async function loadHistory(searchTerm = '') {
-      try {
-        let q;
-        if (searchTerm) {
-          q = query(
-            quotesCollection,
-            where("productId", ">=", searchTerm),
-            where("productId", "<=", searchTerm + '\uf8ff'),
-            orderBy("timestamp", "desc")
-          );
-        } else {
-          q = query(quotesCollection, orderBy("timestamp", "desc"));
+  
+    let selectedImageFile = null;
+  
+    // DOM 加載完成後執行
+    document.addEventListener("DOMContentLoaded", () => {
+      const productImageInput = document.getElementById('productImage');
+      const imagePreview = document.getElementById('imagePreview');
+      const resultImagePreview = document.getElementById('resultImagePreview');
+  
+      // 處理圖片選擇
+      productImageInput.addEventListener('change', function (e) {
+        selectedImageFile = e.target.files[0];
+        if (selectedImageFile) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            imagePreview.src = event.target.result;
+            imagePreview.style.display = 'block';
+            resultImagePreview.src = event.target.result;
+          };
+          reader.readAsDataURL(selectedImageFile);
         }
-
-        const snapshot = await getDocs(q);
-        const historyList = document.getElementById('historyList');
-        historyList.innerHTML = '';
-
-        if (snapshot.empty) {
-          historyList.innerHTML = '<p class="text-muted text-center">沒有歷史記錄</p>';
-          return;
+      });
+  
+      const quotationForm = document.getElementById('quotationForm');
+      const resultContainer = document.getElementById('resultContainer');
+      const saveRecordBtn = document.getElementById('saveRecordBtn');
+  
+      // 提交報價表單
+      quotationForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        calculateQuotation();
+      });
+  
+      // 計算報價
+      async function calculateQuotation() {
+        const productId = document.getElementById('productId').value;
+        const productName = document.getElementById('productName').value;
+        const productCategory = document.getElementById('productCategory').value;
+        const productCost = parseFloat(document.getElementById('productCost').value);
+        const costCurrency = document.getElementById('costCurrency').value;
+        let productWeight = parseFloat(document.getElementById('productWeight').value);
+        const weightUnit = document.getElementById('weightUnit').value;
+        const internationalShipping = parseFloat(document.getElementById('internationalShipping').value);
+        const serviceFeePercent = parseFloat(document.getElementById('serviceFeePercent').value);
+        const additionalServiceFee = parseFloat(document.getElementById('additionalServiceFee').value) || 0;
+  
+        // 如果單位是公斤，轉換為克
+        if (weightUnit === 'kg') {
+          productWeight *= 1000;
         }
-
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          const historyItem = document.createElement('div');
-          historyItem.className = 'col-md-6';
-          historyItem.innerHTML = `
-            <div class="history-item">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <h6>${data.productName || '未命名商品'}</h6>
-                  <p class="mb-1"><small class="text-muted">編號: ${data.productId || '無'}</small></p>
-                </div>
-                <button class="btn btn-sm btn-outline-danger delete-history" data-id="${docSnap.id}">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </div>
-              <div class="mt-2">
-                <p class="mb-1"><strong>類別:</strong> ${data.productCategory || '未分類'}</p>
-                <p class="mb-1"><strong>成本:</strong> ${data.productCost?.toFixed(2) || '0.00'} ${data.costCurrency || ''}</p>
-                <p class="mb-1"><strong>重量:</strong> ${data.productWeight?.toFixed(2) || '0.00'}g</p>
-                <p class="mb-1"><strong>總價:</strong> NT$ ${data.totalPrice?.toFixed(2) || '0.00'}</p>
-                <p class="mb-0"><small class="text-muted">${data.dateString || ''}</small></p>
-              </div>
-              ${data.imageUrl ? `<img src="${data.imageUrl}" class="img-thumbnail mt-2" style="max-height: 100px;">` : ''}
-            </div>
-          `;
-          historyList.appendChild(historyItem);
-        });
-
-        // 刪除按鈕事件
-        document.querySelectorAll('.delete-history').forEach(button => {
-          button.addEventListener('click', async function () {
-            const id = this.getAttribute('data-id');
-            if (confirm('確定要刪除此記錄嗎？')) {
-              try {
-                await deleteDoc(doc(db, "quotations", id));
-                loadHistory(searchTerm);
-              } catch (error) {
-                console.error("刪除記錄時出錯:", error);
-                alert('刪除失敗: ' + error.message);
-              }
-            }
+  
+        const shippingFee = productWeight * internationalShipping;
+        const totalCost = productCost + shippingFee;
+        const serviceFee = totalCost * serviceFeePercent + additionalServiceFee;
+        const totalPrice = totalCost + serviceFee;
+  
+        const now = new Date();
+  
+        document.getElementById('resultProductId').textContent = productId;
+        document.getElementById('resultProductName').textContent = productName;
+        document.getElementById('resultProductCategory').textContent = productCategory;
+        document.getElementById('resultProductCost').textContent = `${productCost.toFixed(2)} ${costCurrency}`;
+        document.getElementById('resultProductWeight').textContent = `${productWeight.toFixed(2)}g`;
+        document.getElementById('resultShippingFee').textContent = `NT$ ${shippingFee.toFixed(2)}`;
+        document.getElementById('resultTotalPrice').textContent = `NT$ ${totalPrice.toFixed(2)}`;
+        document.getElementById('calculationTime').textContent = now.toLocaleString();
+        resultContainer.style.display = 'block';
+  
+        saveRecordBtn.onclick = () => {
+          saveQuotationToFirestore({
+            productId,
+            productName,
+            productCategory,
+            productCost,
+            costCurrency,
+            productWeight,
+            internationalShipping,
+            serviceFeePercent,
+            additionalServiceFee,
+            totalPrice,
+            timestamp: now.getTime(),
+            dateString: now.toLocaleString()
           });
-        });
-      } catch (error) {
-        console.error("加載歷史記錄時出錯:", error);
-        document.getElementById('historyList').innerHTML = '<p class="text-danger text-center">加載歷史記錄失敗</p>';
+        };
       }
-    }
-
-    // === 其他互動 ===
-    document.getElementById('clearAllHistoryBtn')?.addEventListener('click', async function () {
-      if (confirm('確定要刪除所有歷史記錄嗎？此操作不可恢復！')) {
+  
+      // 儲存報價到 Firestore
+      async function saveQuotationToFirestore(quotation) {
         try {
-          const snapshot = await getDocs(quotesCollection);
-          const deletePromises = snapshot.docs.map(docSnap => deleteDoc(doc(db, "quotations", docSnap.id)));
-          await Promise.all(deletePromises);
+          let imageUrl = '';
+          if (selectedImageFile) {
+            const storageRef = ref(storage, `quotation_images/${Date.now()}_${selectedImageFile.name}`);
+            const snapshot = await uploadBytes(storageRef, selectedImageFile);
+            imageUrl = await getDownloadURL(snapshot.ref);
+          }
+  
+          const fullData = { ...quotation, imageUrl };
+          const docRef = await addDoc(quotesCollection, fullData);
+          console.log("報價已保存，文檔ID:", docRef.id);
+          alert("報價已成功保存到雲端！");
           loadHistory();
-          alert('所有歷史記錄已刪除');
         } catch (error) {
-          console.error("刪除所有記錄時出錯:", error);
-          alert('刪除失敗: ' + error.message);
+          console.error("保存報價時出錯:", error);
+          alert("保存失敗: " + error.message);
         }
       }
-    });
-
-    document.getElementById('historySearch')?.addEventListener('input', function () {
-      loadHistory(this.value.trim());
-    });
-
-    document.getElementById('searchHistoryBtn')?.addEventListener('click', function () {
-      const searchInput = document.getElementById('historySearch');
-      loadHistory(searchInput.value.trim());
-    });
-
-    document.getElementById('quotation-tab')?.addEventListener('click', function () {
-      document.getElementById('quotation-section').style.display = 'block';
-      document.getElementById('history-section').style.display = 'none';
-      this.classList.add('active');
-      document.getElementById('history-tab').classList.remove('active');
-    });
-
-    document.getElementById('history-tab')?.addEventListener('click', function () {
-      document.getElementById('quotation-section').style.display = 'none';
-      document.getElementById('history-section').style.display = 'block';
-      this.classList.add('active');
-      document.getElementById('quotation-tab').classList.remove('active');
+  
+      // 加載歷史報價
+      async function loadHistory(searchTerm = '') {
+        try {
+          let q;
+          if (searchTerm) {
+            q = query(
+              quotesCollection,
+              where("productId", ">=", searchTerm),
+              where("productId", "<=", searchTerm + '\uf8ff'),
+              orderBy("timestamp", "desc")
+            );
+          } else {
+            q = query(quotesCollection, orderBy("timestamp", "desc"));
+          }
+  
+          const snapshot = await getDocs(q);
+          const historyList = document.getElementById('historyList');
+          historyList.innerHTML = '';
+  
+          if (snapshot.empty) {
+            historyList.innerHTML = '<p class="text-muted text-center">沒有歷史記錄</p>';
+            return;
+          }
+  
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const historyItem = document.createElement('div');
+            historyItem.className = 'col-md-6';
+            historyItem.innerHTML = `
+              <div class="history-item">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h6>${data.productName || '未命名商品'}</h6>
+                    <p class="mb-1"><small class="text-muted">編號: ${data.productId || '無'}</small></p>
+                  </div>
+                  <button class="btn btn-sm btn-outline-danger delete-history" data-id="${docSnap.id}">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+                <div class="mt-2">
+                  <p class="mb-1"><strong>類別:</strong> ${data.productCategory || '未分類'}</p>
+                  <p class="mb-1"><strong>成本:</strong> ${data.productCost?.toFixed(2) || '0.00'} ${data.costCurrency || ''}</p>
+                  <p class="mb-1"><strong>重量:</strong> ${data.productWeight?.toFixed(2) || '0.00'}g</p>
+                  <p class="mb-1"><strong>總價:</strong> NT$ ${data.totalPrice?.toFixed(2) || '0.00'}</p>
+                  <p class="mb-0"><small class="text-muted">${data.dateString || ''}</small></p>
+                </div>
+                ${data.imageUrl ? `<img src="${data.imageUrl}" class="img-thumbnail mt-2" style="max-height: 100px;">` : ''}
+              </div>
+            `;
+            historyList.appendChild(historyItem);
+          });
+  
+          // 刪除報價歷史
+          document.querySelectorAll('.delete-history').forEach(button => {
+            button.addEventListener('click', async function () {
+              const id = this.getAttribute('data-id');
+              if (confirm('確定要刪除此記錄嗎？')) {
+                try {
+                  await deleteDoc(doc(db, "quotations", id));
+                  loadHistory(searchTerm);
+                } catch (error) {
+                  console.error("刪除記錄時出錯:", error);
+                  alert("刪除失敗: " + error.message);
+                }
+              }
+            });
+          });
+  
+        } catch (error) {
+          console.error("加載歷史記錄時出錯:", error);
+          historyList.innerHTML = '<p class="text-danger text-center">加載歷史記錄失敗</p>';
+        }
+      }
+  
+      // 搜索歷史記錄
+      document.getElementById('historySearch')?.addEventListener('input', function () {
+        loadHistory(this.value.trim());
+      });
+  
+      document.getElementById('searchHistoryBtn')?.addEventListener('click', function () {
+        const searchInput = document.getElementById('historySearch');
+        loadHistory(searchInput.value.trim());
+      });
+  
+      // 切換報價與歷史頁籤
+      document.getElementById('quotation-tab')?.addEventListener('click', function () {
+        document.getElementById('quotation-section').style.display = 'block';
+        document.getElementById('history-section').style.display = 'none';
+        this.classList.add('active');
+        document.getElementById('history-tab').classList.remove('active');
+      });
+  
+      document.getElementById('history-tab')?.addEventListener('click', function () {
+        document.getElementById('quotation-section').style.display = 'none';
+        document.getElementById('history-section').style.display = 'block';
+        this.classList.add('active');
+        document.getElementById('quotation-tab').classList.remove('active');
+        loadHistory();
+      });
+  
       loadHistory();
     });
+  </script>
+  
 
-    loadHistory();
-  });
-</script>
 
 </body>
 </html>
