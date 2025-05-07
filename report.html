@@ -280,8 +280,8 @@
     <select id="monthSelect"></select>
     <input type="date" id="startDate" />
     <input type="date" id="endDate" />
-    <button onclick="generateReport()">生成報表</button>
-    <button onclick="exportToExcel()">匯出 Excel</button>
+    <button id="generateReportBtn">生成報表</button>
+    <button id="exportToExcelBtn">匯出Excel</button>
   </div>
 
   <div class="charts">
@@ -289,136 +289,183 @@
     <canvas id="profitPieChart" width="300" height="300"></canvas>
     <canvas id="categoryChart" width="300" height="300"></canvas>
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
-  <script>
-    let costRevenueChart, profitPieChart, categoryChart;
-
-    const yearSelect = document.getElementById('yearSelect');
-    const monthSelect = document.getElementById('monthSelect');
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
-
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth() + 1;
-
-    yearSelect.innerHTML = '';
-    for (let y = currentYear - 5; y <= currentYear + 1; y++) {
-      yearSelect.innerHTML += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}年</option>`;
-    }
-
-    monthSelect.innerHTML = '';
-    for (let m = 1; m <= 12; m++) {
-      monthSelect.innerHTML += `<option value="${m}" ${m === currentMonth ? 'selected' : ''}>${m}月</option>`;
-    }
-
-    startDateInput.value = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
-    endDateInput.value = today.toISOString().split('T')[0];
-
-    function generateReport() {
-      const startDate = new Date(startDateInput.value);
-      const endDate = new Date(endDateInput.value);
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-
-      let monthlyCost = 0, monthlyPrice = 0, monthlyProfit = 0;
-      const categoryMap = {};
-
-      orders.forEach(order => {
-        const date = new Date(order.date);
-        if (date >= startDate && date <= endDate) {
-          const cost = parseFloat(order.cost || 0);
-          const price = parseFloat(order.price || 0);
-          const profit = price - cost;
-          monthlyCost += cost;
-          monthlyPrice += price;
-          monthlyProfit += profit;
-
-          const category = order.category || "未分類";
-          if (!categoryMap[category]) categoryMap[category] = 0;
-          categoryMap[category] += price;
-        }
-      });
-
-      updateCharts(monthlyCost, monthlyPrice, monthlyProfit, categoryMap);
-    }
-
-    function updateCharts(cost, price, profit, categories) {
-      if (costRevenueChart) costRevenueChart.destroy();
-      if (profitPieChart) profitPieChart.destroy();
-      if (categoryChart) categoryChart.destroy();
-
-      const ctx1 = document.getElementById('costRevenueChart').getContext('2d');
-      costRevenueChart = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: ['成本', '售價'],
-          datasets: [{
-            label: '金額 (TWD)',
-            data: [cost, price],
-            backgroundColor: ['#ff9aa2', '#f6b2c0']
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            title: {
-              display: true,
-              text: '成本與售價比較'
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js';
+    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js';
+  
+    // Firebase 配置
+    const firebaseConfig = {
+  apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+  authDomain: "dg11-c954c.firebaseapp.com",
+  projectId: "dg11-c954c",
+  storageBucket: "dg11-c954c.firebasestorage.app",
+  messagingSenderId: "1010585577335",
+  appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+};
+  
+    // 初始化 Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+  
+    document.addEventListener('DOMContentLoaded', () => {
+      let costRevenueChart, profitPieChart, categoryChart;
+  
+      // 當前日期和選項初始化
+      const yearSelect = document.getElementById('yearSelect');
+      const monthSelect = document.getElementById('monthSelect');
+      const startDateInput = document.getElementById('startDate');
+      const endDateInput = document.getElementById('endDate');
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth() + 1;
+  
+      yearSelect.innerHTML = '';
+      for (let y = currentYear - 5; y <= currentYear + 1; y++) {
+        yearSelect.innerHTML += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}年</option>`;
+      }
+  
+      monthSelect.innerHTML = '';
+      for (let m = 1; m <= 12; m++) {
+        monthSelect.innerHTML += `<option value="${m}" ${m === currentMonth ? 'selected' : ''}>${m}月</option>`;
+      }
+  
+      startDateInput.value = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+      endDateInput.value = today.toISOString().split('T')[0];
+  
+      // 使用 Firestore 生成報表
+      async function generateReport() {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+  
+        // 確保已經初始化 Firestore
+        const ordersRef = collection(db, 'orders');
+        const snapshot = await getDocs(ordersRef);
+  
+        let monthlyCost = 0, monthlyPrice = 0, monthlyProfit = 0;
+        const categoryMap = {};
+  
+        snapshot.forEach(doc => {
+          const order = doc.data();
+          const date = new Date(order.date);
+          if (date >= startDate && date <= endDate) {
+            const cost = parseFloat(order.cost || 0);
+            const price = parseFloat(order.price || 0);
+            const profit = price - cost;
+            monthlyCost += cost;
+            monthlyPrice += price;
+            monthlyProfit += profit;
+  
+            const category = order.category || "未分類";
+            if (!categoryMap[category]) categoryMap[category] = 0;
+            categoryMap[category] += price;
+          }
+        });
+  
+        updateCharts(monthlyCost, monthlyPrice, monthlyProfit, categoryMap);
+      }
+  
+      function updateCharts(cost, price, profit, categories) {
+        if (costRevenueChart) costRevenueChart.destroy();
+        if (profitPieChart) profitPieChart.destroy();
+        if (categoryChart) categoryChart.destroy();
+  
+        const ctx1 = document.getElementById('costRevenueChart').getContext('2d');
+        costRevenueChart = new Chart(ctx1, {
+          type: 'bar',
+          data: {
+            labels: ['成本', '售價'],
+            datasets: [{
+              label: '金額 (TWD)',
+              data: [cost, price],
+              backgroundColor: ['#ff9aa2', '#f6b2c0']
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: '成本與售價比較'
+              }
             }
           }
-        }
-      });
-
-      const ctx2 = document.getElementById('profitPieChart').getContext('2d');
-      profitPieChart = new Chart(ctx2, {
-        type: 'pie',
-        data: {
-          labels: ['利潤', '成本'],
-          datasets: [{
-            data: [profit, cost],
-            backgroundColor: ['#f67280', '#c06c84']
-          }]
-        },
-        options: {
-          plugins: {
-            title: {
-              display: true,
-              text: '利潤百分比'
+        });
+  
+        const ctx2 = document.getElementById('profitPieChart').getContext('2d');
+        profitPieChart = new Chart(ctx2, {
+          type: 'pie',
+          data: {
+            labels: ['利潤', '成本'],
+            datasets: [{
+              data: [profit, cost],
+              backgroundColor: ['#f67280', '#c06c84']
+            }]
+          },
+          options: {
+            plugins: {
+              title: {
+                display: true,
+                text: '利潤百分比'
+              }
             }
           }
-        }
-      });
-
-      const ctx3 = document.getElementById('categoryChart').getContext('2d');
-      categoryChart = new Chart(ctx3, {
-        type: 'doughnut',
-        data: {
-          labels: Object.keys(categories),
-          datasets: [{
-            data: Object.values(categories),
-            backgroundColor: Object.keys(categories).map((_, i) =>
-              `hsl(${i * 40}, 70%, 70%)`
-            )
-          }]
-        },
-        options: {
-          plugins: {
-            title: {
-              display: true,
-              text: '商品分類銷售分析'
+        });
+  
+        const ctx3 = document.getElementById('categoryChart').getContext('2d');
+        categoryChart = new Chart(ctx3, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(categories),
+            datasets: [{
+              data: Object.values(categories),
+              backgroundColor: Object.keys(categories).map((_, i) =>
+                `hsl(${i * 40}, 70%, 70%)`
+              )
+            }]
+          },
+          options: {
+            plugins: {
+              title: {
+                display: true,
+                text: '商品分類銷售分析'
+              }
             }
           }
-        }
-      });
-    }
-
-    function exportToExcel() {
-      const data = JSON.parse(localStorage.getItem('orders') || '[]');
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "報表");
-      XLSX.writeFile(wb, "報表.xlsx");
-    }
+        });
+      }
+  
+      // 匯出 Excel
+      function exportToExcel() {
+        const ordersRef = collection(db, 'orders');
+        getDocs(ordersRef).then(snapshot => {
+          const data = [];
+          snapshot.forEach(doc => {
+            data.push(doc.data());
+          });
+  
+          const ws = XLSX.utils.json_to_sheet(data);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "報表");
+          XLSX.writeFile(wb, "報表.xlsx");
+        });
+      }
+  
+      // 綁定事件
+      const generateReportBtn = document.getElementById('generateReportBtn');
+      const exportToExcelBtn = document.getElementById('exportToExcelBtn');
+  
+      if (generateReportBtn && exportToExcelBtn) {
+        generateReportBtn.addEventListener('click', generateReport);
+        exportToExcelBtn.addEventListener('click', exportToExcel);
+      } else {
+        console.error('找不到按鈕元素');
+      }
+    });
   </script>
+  
+  
+  
 </body>
 </html>
