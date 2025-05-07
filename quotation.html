@@ -344,6 +344,8 @@
                                 <div class="col-md-8 mb-3">
                                     <label for="productName" class="form-label">商品名稱</label>
                                     <input type="text" class="form-control" id="productName" required>
+                                    <input type="number" step="0.01" class="form-control" id="exchangeRate" required placeholder="請輸入匯率 (例如 4.38)">
+
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="productCategory" class="form-label">商品類別</label>
@@ -452,8 +454,7 @@
                             </div>
 
                             <div class="d-flex justify-content-center gap-3 mt-4">
-                                <button id="downloadResultBtn" class="btn btn-success">
-                                    <i class="fas fa-download me-2"></i>下載報價單
+                                <button id="downloadQuoteBtn" class="btn btn-success mt-3">下載報價單</button>
                                 </button>
                                 <button id="saveRecordBtn" class="btn btn-outline-primary">
                                     <i class="fas fa-save me-2"></i>儲存記錄
@@ -511,8 +512,8 @@
       uploadBytes,
       getDownloadURL
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+    import html2canvas from "https://cdn.skypack.dev/html2canvas";
   
-    // Firebase 配置
     const firebaseConfig = {
   apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
   authDomain: "dg11-c954c.firebaseapp.com",
@@ -526,16 +527,13 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
     const quotesCollection = collection(db, "quotations");
-  
     let selectedImageFile = null;
   
-    // DOM 加載完成後執行
     document.addEventListener("DOMContentLoaded", () => {
       const productImageInput = document.getElementById('productImage');
       const imagePreview = document.getElementById('imagePreview');
       const resultImagePreview = document.getElementById('resultImagePreview');
   
-      // 處理圖片選擇
       productImageInput.addEventListener('change', function (e) {
         selectedImageFile = e.target.files[0];
         if (selectedImageFile) {
@@ -553,13 +551,11 @@
       const resultContainer = document.getElementById('resultContainer');
       const saveRecordBtn = document.getElementById('saveRecordBtn');
   
-      // 提交報價表單
       quotationForm.addEventListener('submit', function (e) {
         e.preventDefault();
         calculateQuotation();
       });
   
-      // 計算報價
       async function calculateQuotation() {
         const productId = document.getElementById('productId').value;
         const productName = document.getElementById('productName').value;
@@ -571,16 +567,19 @@
         const internationalShipping = parseFloat(document.getElementById('internationalShipping').value);
         const serviceFeePercent = parseFloat(document.getElementById('serviceFeePercent').value);
         const additionalServiceFee = parseFloat(document.getElementById('additionalServiceFee').value) || 0;
+        const exchangeRate = parseFloat(document.getElementById('exchangeRate').value);
   
-        // 如果單位是公斤，轉換為克
         if (weightUnit === 'kg') {
           productWeight *= 1000;
         }
   
+        // ✅ 新公式：
+        // [商品成本 × (1 + 代付百分比) / 匯率 + 商品重量 × 國際運費] + 服務費
+        const costWithPercent = productCost * (1 + serviceFeePercent);
+        const convertedCost = costWithPercent / exchangeRate;
         const shippingFee = productWeight * internationalShipping;
-        const totalCost = productCost + shippingFee;
-        const serviceFee = totalCost * serviceFeePercent + additionalServiceFee;
-        const totalPrice = totalCost + serviceFee;
+        const totalBeforeService = convertedCost + shippingFee;
+        const totalPrice = totalBeforeService + additionalServiceFee;
   
         const now = new Date();
   
@@ -605,6 +604,7 @@
             internationalShipping,
             serviceFeePercent,
             additionalServiceFee,
+            exchangeRate,
             totalPrice,
             timestamp: now.getTime(),
             dateString: now.toLocaleString()
@@ -612,7 +612,6 @@
         };
       }
   
-      // 儲存報價到 Firestore
       async function saveQuotationToFirestore(quotation) {
         try {
           let imageUrl = '';
@@ -623,8 +622,7 @@
           }
   
           const fullData = { ...quotation, imageUrl };
-          const docRef = await addDoc(quotesCollection, fullData);
-          console.log("報價已保存，文檔ID:", docRef.id);
+          await addDoc(quotesCollection, fullData);
           alert("報價已成功保存到雲端！");
           loadHistory();
         } catch (error) {
@@ -633,7 +631,6 @@
         }
       }
   
-      // 加載歷史報價
       async function loadHistory(searchTerm = '') {
         try {
           let q;
@@ -685,7 +682,6 @@
             historyList.appendChild(historyItem);
           });
   
-          // 刪除報價歷史
           document.querySelectorAll('.delete-history').forEach(button => {
             button.addEventListener('click', async function () {
               const id = this.getAttribute('data-id');
@@ -703,11 +699,10 @@
   
         } catch (error) {
           console.error("加載歷史記錄時出錯:", error);
-          historyList.innerHTML = '<p class="text-danger text-center">加載歷史記錄失敗</p>';
+          document.getElementById('historyList').innerHTML = '<p class="text-danger text-center">加載歷史記錄失敗</p>';
         }
       }
   
-      // 搜索歷史記錄
       document.getElementById('historySearch')?.addEventListener('input', function () {
         loadHistory(this.value.trim());
       });
@@ -717,7 +712,6 @@
         loadHistory(searchInput.value.trim());
       });
   
-      // 切換報價與歷史頁籤
       document.getElementById('quotation-tab')?.addEventListener('click', function () {
         document.getElementById('quotation-section').style.display = 'block';
         document.getElementById('history-section').style.display = 'none';
@@ -733,11 +727,25 @@
         loadHistory();
       });
   
+      // 下載報價單功能
+      document.getElementById('downloadQuoteBtn')?.addEventListener('click', async () => {
+        const resultContainer = document.getElementById('resultContainer');
+        if (!resultContainer) return;
+        try {
+          const canvas = await html2canvas(resultContainer);
+          const link = document.createElement("a");
+          link.download = "quotation.png";
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        } catch (err) {
+          console.error("生成圖片失敗:", err);
+          alert("下載失敗，請稍後再試。");
+        }
+      });
+  
       loadHistory();
     });
-  </script>
-  
-
+  </script>  
 
 </body>
 </html>
