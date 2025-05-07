@@ -849,142 +849,207 @@
       
     </script>
       <a href="home.html" class="return-home-btn">🏠 返回主頁</a>
-<!-- Firebase SDK -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  
-    const firebaseConfig = {
-      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
-      authDomain: "dg11-c954c.firebaseapp.com",
-      projectId: "dg11-c954c",
-      storageBucket: "dg11-c954c.appspot.com",
-      messagingSenderId: "1010585577335",
-      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
-    };
-  
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    window.firestoreDB = db;
-  </script>
-  
-  <script type="module">
-    import {
-      getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  
-    window.addEventListener("DOMContentLoaded", () => {
-      const db = window.firestoreDB;
-      const quotesCollection = collection(db, "quotations");
-  
-      async function saveQuoteToFirestore(quote) {
+      
+      <script type="module">
+        // Firebase 初始化模組
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { 
+          getFirestore, 
+          collection, 
+          addDoc, 
+          getDocs, 
+          deleteDoc, 
+          doc, 
+          query, 
+          where 
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      
+        // Firebase 配置
+        const firebaseConfig = {
+          apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+          authDomain: "dg11-c954c.firebaseapp.com",
+          projectId: "dg11-c954c",
+          storageBucket: "dg11-c954c.appspot.com",
+          messagingSenderId: "1010585577335",
+          appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+        };
+      
+        // 初始化 Firebase
         try {
-          await addDoc(quotesCollection, quote);
+          const app = initializeApp(firebaseConfig);
+          const db = getFirestore(app);
+          console.log("Firebase 初始化成功");
+          
+          // 暴露給全局以便其他模組使用
+          window.firestoreDB = db;
         } catch (error) {
-          console.error("儲存報價到 Firestore 時發生錯誤:", error);
+          console.error("Firebase 初始化失敗:", error);
+          alert("應用程式初始化失敗，請刷新頁面或聯繫管理員");
         }
-      }
-  
-      async function displayHistory() {
-        const snapshot = await getDocs(quotesCollection);
-        const tableBody = document.querySelector("#historyTable tbody");
-        if (!tableBody) return;
-  
-        tableBody.innerHTML = "";
-  
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${data.productId || ""}</td>
-            <td>${data.name || ""}</td>
-            <td>${data.category || ""}</td>
-            <td>${data.cost || ""}</td>
-            <td>${data.weight || ""}</td>
-            <td>${data.calculatedPrice || ""}</td>
-            <td>${data.currency || ""}</td>
-            <td><button class="deleteBtn" data-id="${docSnap.id}">刪除</button></td>
-          `;
-          tableBody.appendChild(row);
-        });
-  
-        document.querySelectorAll(".deleteBtn").forEach(button => {
-          button.addEventListener("click", async function () {
-            const id = this.getAttribute("data-id");
-            await deleteDoc(doc(db, "quotations", id));
-            displayHistory();
-          });
-        });
-      }
-  
-      const searchInput = document.getElementById("searchInput");
-      if (searchInput) {
-        searchInput.addEventListener("input", async function () {
-          const keyword = this.value.trim();
-          const tableBody = document.querySelector("#historyTable tbody");
-          if (!tableBody) return;
-  
-          tableBody.innerHTML = "";
-  
-          if (keyword === "") {
-            displayHistory();
+      </script>
+      
+      <script type="module">
+        import { 
+          getFirestore, 
+          collection, 
+          addDoc, 
+          getDocs, 
+          deleteDoc, 
+          doc, 
+          query, 
+          where 
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      
+        document.addEventListener("DOMContentLoaded", async () => {
+          // 檢查 Firebase 是否初始化成功
+          if (!window.firestoreDB) {
+            console.error("Firestore 未正確初始化");
             return;
           }
-  
-          const q = query(quotesCollection, where("productId", "==", keyword));
-          const snapshot = await getDocs(q);
-  
-          snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            const row = document.createElement("tr");
-            row.innerHTML = `
-              <td>${data.productId || ""}</td>
-              <td>${data.name || ""}</td>
-              <td>${data.category || ""}</td>
-              <td>${data.cost || ""}</td>
-              <td>${data.weight || ""}</td>
-              <td>${data.calculatedPrice || ""}</td>
-              <td>${data.currency || ""}</td>
-              <td><button class="deleteBtn" data-id="${docSnap.id}">刪除</button></td>
-            `;
-            tableBody.appendChild(row);
-          });
-  
-          document.querySelectorAll(".deleteBtn").forEach(button => {
-            button.addEventListener("click", async function () {
-              const id = this.getAttribute("data-id");
-              await deleteDoc(doc(db, "quotations", id));
-              displayHistory();
+      
+          const db = window.firestoreDB;
+          const quotesCollection = collection(db, "quotations");
+      
+          // 保存報價到 Firestore
+          async function saveQuoteToFirestore(quote) {
+            try {
+              const docRef = await addDoc(quotesCollection, quote);
+              console.log("報價已保存，文檔ID:", docRef.id);
+              return true;
+            } catch (error) {
+              console.error("保存報價時出錯:", error);
+              alert(`保存失敗: ${error.message}`);
+              return false;
+            }
+          }
+      
+          // 顯示歷史記錄
+          async function displayHistory(searchKeyword = "") {
+            try {
+              let snapshot;
+              if (searchKeyword) {
+                // 如果有搜索關鍵字，使用查詢
+                const q = query(
+                  quotesCollection, 
+                  where("productId", "==", searchKeyword)
+                );
+                snapshot = await getDocs(q);
+              } else {
+                // 否則獲取所有文檔
+                snapshot = await getDocs(quotesCollection);
+              }
+      
+              const tableBody = document.querySelector("#historyTable tbody");
+              if (!tableBody) {
+                console.error("找不到表格主體");
+                return;
+              }
+      
+              tableBody.innerHTML = "";
+      
+              if (snapshot.empty) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td colspan="8" class="text-center">沒有找到記錄</td>`;
+                tableBody.appendChild(row);
+                return;
+              }
+      
+              // 按時間戳降序排序
+              const sortedDocs = snapshot.docs.sort((a, b) => 
+                (b.data().timestamp || 0) - (a.data().timestamp || 0)
+              );
+      
+              sortedDocs.forEach(docSnap => {
+                const data = docSnap.data();
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                  <td>${data.productId || "-"}</td>
+                  <td>${data.name || "-"}</td>
+                  <td>${data.category || "-"}</td>
+                  <td>${data.cost ? data.cost.toFixed(2) : "-"}</td>
+                  <td>${data.weight ? data.weight.toFixed(2) : "-"}</td>
+                  <td>${data.calculatedPrice ? data.calculatedPrice.toFixed(2) : "-"}</td>
+                  <td>${data.currency || "-"}</td>
+                  <td>
+                    <button class="deleteBtn btn btn-danger btn-sm" data-id="${docSnap.id}">
+                      刪除
+                    </button>
+                  </td>
+                `;
+                tableBody.appendChild(row);
+              });
+      
+              // 添加刪除按鈕事件監聽器
+              document.querySelectorAll(".deleteBtn").forEach(button => {
+                button.addEventListener("click", async function() {
+                  if (!confirm("確定要刪除此記錄嗎？")) return;
+                  
+                  const id = this.getAttribute("data-id");
+                  try {
+                    await deleteDoc(doc(db, "quotations", id));
+                    console.log("記錄已刪除:", id);
+                    displayHistory(searchKeyword);
+                  } catch (error) {
+                    console.error("刪除記錄時出錯:", error);
+                    alert("刪除失敗: " + error.message);
+                  }
+                });
+              });
+      
+            } catch (error) {
+              console.error("載入歷史記錄時出錯:", error);
+              alert("載入歷史記錄失敗: " + error.message);
+            }
+          }
+      
+          // 搜索功能
+          const searchInput = document.getElementById("searchInput");
+          if (searchInput) {
+            searchInput.addEventListener("input", function() {
+              displayHistory(this.value.trim());
             });
-          });
-        });
-      }
-  
-      const form = document.getElementById("quoteForm");
-      if (form) {
-        form.addEventListener("submit", async function (e) {
-          e.preventDefault();
-  
-          const quote = {
-            productId: document.getElementById("productId").value,
-            name: document.getElementById("name").value,
-            category: document.getElementById("category").value,
-            cost: parseFloat(document.getElementById("cost").value),
-            weight: parseFloat(document.getElementById("weight").value),
-            calculatedPrice: parseFloat(document.getElementById("calculatedPrice").textContent),
-            currency: document.getElementById("currency").value,
-            timestamp: Date.now()
-          };
-  
-          await saveQuoteToFirestore(quote);
+          }
+      
+          // 表單提交處理
+          const form = document.getElementById("quoteForm");
+          if (form) {
+            form.addEventListener("submit", async function(e) {
+              e.preventDefault();
+      
+              // 收集表單數據
+              const quote = {
+                productId: document.getElementById("productId").value.trim(),
+                name: document.getElementById("name").value.trim(),
+                category: document.getElementById("category").value.trim(),
+                cost: parseFloat(document.getElementById("cost").value) || 0,
+                weight: parseFloat(document.getElementById("weight").value) || 0,
+                calculatedPrice: parseFloat(document.getElementById("calculatedPrice").textContent) || 0,
+                currency: document.getElementById("currency").value,
+                timestamp: Date.now()
+              };
+      
+              // 驗證必要字段
+              if (!quote.productId || !quote.name) {
+                alert("請填寫產品ID和名稱");
+                return;
+              }
+      
+              // 保存到Firestore
+              const isSaved = await saveQuoteToFirestore(quote);
+              
+              if (isSaved) {
+                // 重置表單並刷新歷史記錄
+                form.reset();
+                displayHistory();
+                alert("報價已成功保存");
+              }
+            });
+          }
+      
+          // 初始載入歷史記錄
           displayHistory();
-          form.reset();
         });
-      }
-  
-      displayHistory();
-    });
-  </script>
+      </script>
   
 </body>
 </html>
