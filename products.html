@@ -14,20 +14,18 @@
       padding: 0;
       font-family: 'Poppins', sans-serif;
       background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7));
-      overflow: hidden;
+      overflow: auto;
       color: #fff;
       position: relative;
       animation: bgMovement 10s infinite ease-in-out;
     }
     
-    /* 背景動態效果 */
     @keyframes bgMovement {
       0% { background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7)); }
       50% { background: radial-gradient(circle, rgba(255, 200, 220, 0.8), rgba(255, 160, 180, 0.8)); }
       100% { background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7)); }
     }
     
-    /* 微粒子背景 */
     body::before {
       content: '';
       position: absolute;
@@ -46,7 +44,6 @@
       100% { transform: translate(100%, 100%); }
     }
     
-    /* 容器 */
     .container {
       max-width: 1000px;
       margin: 60px auto;
@@ -65,7 +62,6 @@
       100% { opacity: 1; transform: translateY(0); }
     }
     
-    /* 標題 */
     h1 {
       text-align: center;
       font-size: 3.8rem;
@@ -81,7 +77,6 @@
       100% { opacity: 1; transform: translateY(0); }
     }
     
-    /* 光效圓環 */
     h1::after {
       content: '';
       position: absolute;
@@ -102,7 +97,6 @@
       100% { opacity: 0.6; transform: translateX(-50%) scale(0.9); }
     }
     
-    /* 表格 */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -134,26 +128,23 @@
       text-transform: uppercase;
     }
     
-  /* 表格的輸入區域 */
-  td input, td select {
-    padding: 12px 16px;
-    width: 100%;
-    border: none;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.5); /* 更清晰的背景顏色 */
-    color: #333; /* 文字顏色 */
-    font-size: 1rem;
-    box-shadow: 0 0 15px rgba(255, 105, 180, 0.3); /* 加強陰影效果 */
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  /* 輸入框和下拉選單焦點時 */
-  td input:focus, td select:focus {
-    background: rgba(255, 255, 255, 0.7); /* 焦點時更亮 */
-    box-shadow: 0 0 25px rgba(255, 105, 180, 0.4); /* 焦點陰影效果 */
-  }
+    td input, td select {
+      padding: 12px 16px;
+      width: 100%;
+      border: none;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.5);
+      color: #333;
+      font-size: 1rem;
+      box-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
     
-    /* 按鈕 */
+    td input:focus, td select:focus {
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 0 25px rgba(255, 105, 180, 0.4);
+    }
+    
     .action-buttons button {
       padding: 16px 32px;
       border-radius: 50px;
@@ -183,10 +174,11 @@
     }
     
     .delete-btn {
-      background: linear-gradient(145deg, #f44336, #e57373);
+      background: linear-gradient(to right, #ff80ab, #ffb6c1); /* 改為與新增按鈕相同 */
+      color: white;
+      box-shadow: 0 0 40px rgba(255, 105, 180, 0.4);
     }
     
-    /* 新增按鈕 */
     .add-btn {
       display: block;
       margin: 70px auto 0;
@@ -206,39 +198,11 @@
       100% { opacity: 1; transform: scale(1); }
     }
     
-    .add-btn:hover {
+    .add-btn:hover, .delete-btn:hover {
       transform: scale(1.1);
       box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
     }
     
-    /* 匯出 Excel 按鈕 */
-.export-btn {
-  display: block;
-  margin: 70px auto 0;
-  padding: 20px 40px;
-  font-size: 1.2rem;
-  border-radius: 50px;
-  font-weight: bold;
-  background: linear-gradient(to right, #ff80ab, #ffb6c1);
-  color: white;
-  box-shadow: 0 0 40px rgba(255, 105, 180, 0.4);
-  transition: transform 0.3s ease, box-shadow 0.4s ease;
-  animation: exportButtonIn 1.5s ease-out;
-}
-
-/* 匯出按鈕進場動畫 */
-@keyframes exportButtonIn {
-  0% { opacity: 0; transform: scale(0.8); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-/* 匯出按鈕 hover 效果 */
-.export-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
-}
-
-    /* 回首頁 */
     .back-to-home-btn {
       position: fixed;
       top: 20px;
@@ -264,7 +228,6 @@
       box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
     }
     
-    /* 鼠標跟隨粒子 */
     body::after {
       content: '';
       position: absolute;
@@ -281,14 +244,8 @@
       0% { opacity: 1; transform: scale(1); }
       100% { opacity: 0; transform: scale(0); }
     }
-    
-    /* 背景粒子動態 */
-    @keyframes particles {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(100%, 100%); }
-    }
-    
     </style>
+    
   
 </head>
 <body>
@@ -306,136 +263,151 @@
       <tbody id="productList"></tbody>
     </table>
     <button class="add-btn" onclick="addProduct()">➕ 新增商品</button>
-    <!-- 在頁面中加入匯出按鈕 -->
-    <button class="export-btn" onclick="exportToExcel()">匯出為 Excel</button>
+    <button class="add-btn">刪除所有資料</button>
   </div>
   <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
 
-<!-- 引入 xlsx 庫 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
-
-<script>
-  // Firebase 初始化（使用你提供的 firebaseConfig）
-  const firebaseConfig = {
-    apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
-    authDomain: "dg11-c954c.firebaseapp.com",
-    projectId: "dg11-c954c",
-    storageBucket: "dg11-c954c.firebasestorage.app",
-    messagingSenderId: "1010585577335",
-    appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const collection = db.collection("products");
-  const productList = document.getElementById("productList");
-
-  function createRow(doc = null, data = {}) {
-    const row = document.createElement("tr");
-
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.value = data.name || "";
-
-    const priceInput = document.createElement("input");
-    priceInput.type = "number";
-    priceInput.value = data.price || "";
-
-    const currencySelect = document.createElement("select");
-    ["韓元", "台幣", "日元", "人民幣", "美元"].forEach(cur => {
-      const option = document.createElement("option");
-      option.value = cur;
-      option.textContent = cur;
-      if (data.currency === cur) option.selected = true;
-      currencySelect.appendChild(option);
-    });
-
-    const quantityInput = document.createElement("input");
-    quantityInput.type = "number";
-    quantityInput.value = data.quantity || "";
-
-    const saveBtn = document.createElement("button");
-    saveBtn.className = "save-btn";
-    saveBtn.textContent = "保存";
-    saveBtn.onclick = async () => {
-      const product = {
-        name: nameInput.value.trim(),
-        price: parseFloat(priceInput.value) || 0,
-        currency: currencySelect.value,
-        quantity: parseInt(quantityInput.value) || 0
+  <script>
+    // Firebase 初始化（使用你提供的 firebaseConfig）
+    const firebaseConfig = {
+      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+      authDomain: "dg11-c954c.firebaseapp.com",
+      projectId: "dg11-c954c",
+      storageBucket: "dg11-c954c.appspot.com",
+      messagingSenderId: "1010585577335",
+      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+    };
+    
+    // 初始化 Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const collection = db.collection("products");
+    const productList = document.getElementById("productList");
+  
+    // 創建表格行
+    function createRow(doc = null, data = {}) {
+      const row = document.createElement("tr");
+  
+      // 商品名稱輸入框
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.value = data.name || "";
+  
+      // 價格輸入框
+      const priceInput = document.createElement("input");
+      priceInput.type = "number";
+      priceInput.value = data.price || "";
+  
+      // 貨幣選擇下拉框
+      const currencySelect = document.createElement("select");
+      ["韓元", "台幣", "日元", "人民幣", "美元"].forEach(cur => {
+        const option = document.createElement("option");
+        option.value = cur;
+        option.textContent = cur;
+        if (data.currency === cur) option.selected = true;
+        currencySelect.appendChild(option);
+      });
+  
+      // 數量輸入框
+      const quantityInput = document.createElement("input");
+      quantityInput.type = "number";
+      quantityInput.value = data.quantity || "";
+  
+      // 保存按鈕
+      const saveBtn = document.createElement("button");
+      saveBtn.className = "save-btn";
+      saveBtn.textContent = "保存";
+      saveBtn.onclick = async () => {
+        const product = {
+          name: nameInput.value.trim(),
+          price: parseFloat(priceInput.value) || 0,
+          currency: currencySelect.value,
+          quantity: parseInt(quantityInput.value) || 0
+        };
+        
+        try {
+          if (doc) {
+            await collection.doc(doc.id).update(product);
+          } else {
+            await collection.add(product);
+          }
+          alert("✅ 資料已保存");
+          loadData();
+        } catch (error) {
+          alert("❌ 保存失敗: " + error.message);
+        }
       };
-      if (doc) {
-        await collection.doc(doc.id).set(product);
-      } else {
-        await collection.add(product);
+  
+      // 刪除按鈕
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delete-btn";
+      deleteBtn.textContent = "刪除";
+      deleteBtn.onclick = async () => {
+        if (confirm("確定要刪除這條記錄嗎？")) {
+          if (doc) await collection.doc(doc.id).delete();
+          row.remove();
+        }
+      };
+  
+      // 清空行內容並重新添加元素
+      row.innerHTML = "";
+      row.appendChild(document.createElement("td")).appendChild(nameInput);
+      
+      const priceTd = document.createElement("td");
+      priceTd.appendChild(priceInput);
+      priceTd.appendChild(currencySelect);
+      row.appendChild(priceTd);
+      
+      row.appendChild(document.createElement("td")).appendChild(quantityInput);
+      
+      const actionsTd = document.createElement("td");
+      actionsTd.className = "action-buttons";
+      actionsTd.appendChild(saveBtn);
+      actionsTd.appendChild(deleteBtn);
+      row.appendChild(actionsTd);
+  
+      productList.appendChild(row);
+    }
+  
+    // 添加新商品
+    function addProduct() {
+      createRow();
+    }
+  
+    // 加載數據
+    async function loadData() {
+      try {
+        const snapshot = await collection.get();
+        productList.innerHTML = "";
+        snapshot.forEach(doc => createRow(doc, doc.data()));
+      } catch (error) {
+        alert("加載數據失敗: " + error.message);
       }
-      alert("✅ 資料已保存");
-      loadData();
-    };
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "delete-btn";
-    deleteBtn.textContent = "刪除";
-    deleteBtn.onclick = async () => {
-      if (doc) await collection.doc(doc.id).delete();
-      row.remove();
-    };
-
-    row.innerHTML = "";
-    row.appendChild(document.createElement("td")).appendChild(nameInput);
-    const priceTd = document.createElement("td");
-    priceTd.appendChild(priceInput);
-    priceTd.appendChild(currencySelect);
-    row.appendChild(priceTd);
-    row.appendChild(document.createElement("td")).appendChild(quantityInput);
-    const actionsTd = document.createElement("td");
-    actionsTd.className = "action-buttons";
-    actionsTd.appendChild(saveBtn);
-    actionsTd.appendChild(deleteBtn);
-    row.appendChild(actionsTd);
-
-    productList.appendChild(row);
-  }
-
-  function addProduct() {
-    createRow();
-  }
-
-  async function loadData() {
-    const snapshot = await collection.get();
-    productList.innerHTML = "";
-    snapshot.forEach(doc => createRow(doc, doc.data()));
-  }
-
-  // 匯出 Excel 功能
-  async function exportToExcel() {
-    const snapshot = await collection.get();
-    const products = [];
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      products.push([
-        data.name,
-        data.price,
-        data.currency,
-        data.quantity
-      ]);
-    });
-
-    // 創建表格內容
-    let csvContent = "名稱, 價格, 幣別, 數量\n"; // CSV 表頭
-    products.forEach(product => {
-      csvContent += product.join(",") + "\n"; // 每個產品資料以逗號分隔
-    });
-
-    // 創建下載鏈接
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "products.csv"; // 設定下載的檔案名
-    link.click();
-  }
-
-  window.onload = loadData;
-</script>
+    }
+  
+    // 刪除所有記錄
+    async function deleteAllRecords() {
+      if (confirm("⚠️ 確定要刪除所有記錄嗎？此操作無法撤銷！")) {
+        try {
+          const snapshot = await collection.get();
+          const batch = db.batch();
+          
+          snapshot.forEach(doc => {
+            batch.delete(doc.ref);
+          });
+          
+          await batch.commit();
+          alert("✅ 所有記錄已刪除");
+          loadData();
+        } catch (error) {
+          alert("❌ 刪除失敗: " + error.message);
+        }
+      }
+    }
+  
+    // 頁面加載時自動加載數據
+    window.onload = loadData;
+  </script>
 
 </body>
 </html>
