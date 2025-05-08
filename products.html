@@ -4,247 +4,273 @@
   <meta charset="UTF-8" />
   <title>11DG11 庫存管理</title>
   <link rel="icon" href="favicon.png">
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap');
-    
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-      background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7));
-      overflow: auto;
-      color: #fff;
-      position: relative;
-      animation: bgMovement 10s infinite ease-in-out;
-    }
-    
-    @keyframes bgMovement {
-      0% { background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7)); }
-      50% { background: radial-gradient(circle, rgba(255, 200, 220, 0.8), rgba(255, 160, 180, 0.8)); }
-      100% { background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7)); }
-    }
-    
-    body::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-      background-size: 20px 20px;
-      pointer-events: none;
-      animation: particles 60s linear infinite;
-    }
-    
-    @keyframes particles {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(100%, 100%); }
-    }
-    
-    .container {
-      max-width: 1000px;
-      margin: 60px auto;
-      padding: 50px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(40px);
-      border-radius: 40px;
-      box-shadow: 0 8px 40px rgba(255, 80, 135, 0.2), 0 16px 60px rgba(255, 105, 180, 0.3);
-      position: relative;
-      z-index: 1;
-      animation: fadeIn 1.2s ease-out;
-    }
-    
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    
-    h1 {
-      text-align: center;
-      font-size: 3.8rem;
-      color: #ff4081;
-      text-shadow: 0 6px 12px rgba(255, 64, 129, 0.4), 0 0 20px #ff80ab;
-      margin-bottom: 60px;
-      position: relative;
-      animation: titleIn 1.5s ease-out;
-    }
-    
-    @keyframes titleIn {
-      0% { opacity: 0; transform: translateY(-40px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    
-    h1::after {
-      content: '';
-      position: absolute;
-      top: 110%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      border: 2px solid #ff80ab;
-      box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
-      animation: glowRing 2s infinite ease-in-out;
-    }
-    
-    @keyframes glowRing {
-      0% { opacity: 0.6; transform: translateX(-50%) scale(0.9); }
-      50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
-      100% { opacity: 0.6; transform: translateX(-50%) scale(0.9); }
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(255, 105, 180, 0.2);
-      animation: tableIn 1s ease-out;
-    }
-    
-    @keyframes tableIn {
-      0% { opacity: 0; transform: translateY(40px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    
-    th, td {
-      padding: 18px 24px;
-      text-align: left;
-      font-size: 1.1rem;
-      color: #fff;
-      background: rgba(255, 255, 255, 0.2);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    
-    th {
-      background: linear-gradient(90deg, #ff80ab, #ffb6c1);
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-    
-    td input, td select {
-      padding: 12px 16px;
-      width: 100%;
-      border: none;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.5);
-      color: #333;
-      font-size: 1rem;
-      box-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    td input:focus, td select:focus {
-      background: rgba(255, 255, 255, 0.7);
-      box-shadow: 0 0 25px rgba(255, 105, 180, 0.4);
-    }
-    
-    .action-buttons button {
-      padding: 16px 32px;
-      border-radius: 50px;
-      font-weight: bold;
-      font-size: 1.1rem;
-      cursor: pointer;
-      color: #fff;
-      border: none;
-      background: linear-gradient(145deg, #ff80ab, #ffb6c1);
-      box-shadow: 0 0 25px rgba(255, 105, 180, 0.3);
-      transition: transform 0.3s ease, box-shadow 0.4s ease;
-      animation: buttonIn 1.5s ease-out;
-    }
-    
-    @keyframes buttonIn {
-      0% { opacity: 0; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    
-    .action-buttons button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
-    }
-    
-    .save-btn {
-      background: linear-gradient(145deg, #00c9a7, #00e5b2);
-    }
-    
-    .delete-btn {
-      background: linear-gradient(to right, #ff80ab, #ffb6c1); /* 改為與新增按鈕相同 */
-      color: white;
-      box-shadow: 0 0 40px rgba(255, 105, 180, 0.4);
-    }
-    
-    .add-btn {
-      display: block;
-      margin: 70px auto 0;
-      padding: 20px 40px;
-      font-size: 1.2rem;
-      border-radius: 50px;
-      font-weight: bold;
-      background: linear-gradient(to right, #ff80ab, #ffb6c1);
-      color: white;
-      box-shadow: 0 0 40px rgba(255, 105, 180, 0.4);
-      transition: transform 0.3s ease, box-shadow 0.4s ease;
-      animation: addButtonIn 1.5s ease-out;
-    }
-    
-    @keyframes addButtonIn {
-      0% { opacity: 0; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    
-    .add-btn:hover, .delete-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
-    }
-    
-    .back-to-home-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(to right, #ec407a, #ba68c8);
-      color: #fff;
-      padding: 14px 28px;
-      font-weight: bold;
-      border-radius: 50px;
-      box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
-      text-decoration: none;
-      transition: transform 0.3s ease;
-      animation: backButtonIn 2s ease-out;
-    }
-    
-    @keyframes backButtonIn {
-      0% { opacity: 0; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    
-    .back-to-home-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
-    }
-    
-    body::after {
-      content: '';
-      position: absolute;
-      top: -10px;
-      left: -10px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #ff80ab;
-      animation: mouseParticles 0.3s ease-in-out infinite;
-    }
-    
-    @keyframes mouseParticles {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0); }
-    }
-    </style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap');
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7));
+    overflow: auto;
+    color: #fff;
+    position: relative;
+    animation: bgMovement 10s infinite ease-in-out;
+  }
+  
+  @keyframes bgMovement {
+    0% { background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7)); }
+    50% { background: radial-gradient(circle, rgba(255, 200, 220, 0.8), rgba(255, 160, 180, 0.8)); }
+    100% { background: radial-gradient(circle, rgba(255, 191, 221, 0.7), rgba(255, 175, 195, 0.7)); }
+  }
+  
+  body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    animation: particles 60s linear infinite;
+  }
+  
+  @keyframes particles {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(100%, 100%); }
+  }
+  
+  .container {
+    max-width: 1000px;
+    margin: 60px auto;
+    padding: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(40px);
+    border-radius: 40px;
+    box-shadow: 0 8px 40px rgba(255, 80, 135, 0.2), 0 16px 60px rgba(255, 105, 180, 0.3);
+    position: relative;
+    z-index: 1;
+    animation: fadeIn 1.2s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  
+  h1 {
+    text-align: center;
+    font-size: 3.8rem;
+    color: #ff4081;
+    text-shadow: 0 6px 12px rgba(255, 64, 129, 0.4), 0 0 20px #ff80ab;
+    margin-bottom: 60px;
+    position: relative;
+    animation: titleIn 1.5s ease-out;
+  }
+  
+  @keyframes titleIn {
+    0% { opacity: 0; transform: translateY(-40px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  
+  h1::after {
+    content: '';
+    position: absolute;
+    top: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 2px solid #ff80ab;
+    box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
+    animation: glowRing 2s infinite ease-in-out;
+  }
+  
+  @keyframes glowRing {
+    0% { opacity: 0.6; transform: translateX(-50%) scale(0.9); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+    100% { opacity: 0.6; transform: translateX(-50%) scale(0.9); }
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(255, 105, 180, 0.2);
+    animation: tableIn 1s ease-out;
+  }
+  
+  @keyframes tableIn {
+    0% { opacity: 0; transform: translateY(40px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  
+  th, td {
+    padding: 18px 24px;
+    text-align: left;
+    font-size: 1.1rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  
+  th {
+    background: linear-gradient(90deg, #ff80ab, #ffb6c1);
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  td input, td select {
+    padding: 12px 16px;
+    width: 100%;
+    border: none;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    color: #333;
+    font-size: 1rem;
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  td input:focus, td select:focus {
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 25px rgba(255, 105, 180, 0.4);
+  }
+  
+  .action-buttons button {
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #fff;
+    border: none;
+    background: linear-gradient(145deg, #ff80ab, #ffb6c1);
+    box-shadow: 0 0 25px rgba(255, 105, 180, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.4s ease;
+    animation: buttonIn 1.5s ease-out;
+  }
+  
+  @keyframes buttonIn {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  
+  .action-buttons button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
+  }
+  
+  .save-btn {
+    background: linear-gradient(145deg, #00c9a7, #00e5b2);
+  }
+  
+  .add-btn {
+    display: block;
+    margin: 70px auto 0;
+    padding: 20px 40px;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    font-weight: bold;
+    background: linear-gradient(to right, #ff80ab, #ffb6c1);
+    color: white;
+    box-shadow: 0 0 40px rgba(255, 105, 180, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.4s ease;
+    animation: addButtonIn 1.5s ease-out;
+  }
+  
+  .delete-btn {
+    display: block;
+    margin: 20px auto 0;
+    padding: 20px 40px;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    font-weight: bold;
+    background: linear-gradient(to right, #ff80ab, #ffb6c1);
+    color: white;
+    box-shadow: 0 0 40px rgba(255, 105, 180, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.4s ease;
+    animation: addButtonIn 1.5s ease-out;
+  }
+  
+  @keyframes addButtonIn {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  
+  .add-btn:hover, .delete-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
+  }
+
+  .clear-btn, .delete-all-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 20px 40px;
+  font-size: 1.2rem;
+  border-radius: 50px;
+  font-weight: bold;
+  background: linear-gradient(to right, #ff80ab, #ffb6c1);
+  color: white;
+  box-shadow: 0 0 40px rgba(255, 105, 180, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.4s ease;
+  animation: addButtonIn 1.5s ease-out;
+}
+
+.clear-btn:hover, .delete-all-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
+}
+
+  
+  .back-to-home-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(to right, #ec407a, #ba68c8);
+    color: #fff;
+    padding: 14px 28px;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+    text-decoration: none;
+    transition: transform 0.3s ease;
+    animation: backButtonIn 2s ease-out;
+  }
+  
+  @keyframes backButtonIn {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  
+  .back-to-home-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+  }
+  
+  body::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ff80ab;
+    animation: mouseParticles 0.3s ease-in-out infinite;
+  }
+  
+  @keyframes mouseParticles {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0); }
+  }
+</style>  
     
   
 </head>
@@ -263,150 +289,195 @@
       <tbody id="productList"></tbody>
     </table>
     <button class="add-btn" onclick="addProduct()">➕ 新增商品</button>
-    <button class="add-btn">刪除所有資料</button>
+    <button class="delete-all-btn" onclick="deleteAllRecords()">🗑️ 刪除所有記錄</button>
   </div>
   <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
 
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script>
-    // Firebase 初始化（使用你提供的 firebaseConfig）
-    const firebaseConfig = {
-      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
-      authDomain: "dg11-c954c.firebaseapp.com",
-      projectId: "dg11-c954c",
-      storageBucket: "dg11-c954c.appspot.com",
-      messagingSenderId: "1010585577335",
-      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
-    };
-    
-    // 初始化 Firebase
-    firebase.initializeApp(firebaseConfig);
+    // 防止重复初始化检查
+    if (typeof firebase === 'undefined') {
+      throw new Error('Firebase SDK 未正确加载，请检查网络连接');
+    }
+  
+    // 初始化 Firebase（只初始化一次）
+    if (!firebase.apps.length) {
+      const firebaseConfig = {
+  apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+  authDomain: "dg11-c954c.firebaseapp.com",
+  projectId: "dg11-c954c",
+  storageBucket: "dg11-c954c.firebasestorage.app",
+  messagingSenderId: "1010585577335",
+  appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+};
+      firebase.initializeApp(firebaseConfig);
+    }
+  
     const db = firebase.firestore();
-    const collection = db.collection("products");
+    const productsCollection = db.collection("products");
     const productList = document.getElementById("productList");
   
-    // 創建表格行
+    // 创建表格行
     function createRow(doc = null, data = {}) {
       const row = document.createElement("tr");
+      row.className = "product-row";
   
-      // 商品名稱輸入框
+      // 商品名称
+      const nameCell = document.createElement("td");
       const nameInput = document.createElement("input");
       nameInput.type = "text";
+      nameInput.className = "product-name";
       nameInput.value = data.name || "";
+      nameCell.appendChild(nameInput);
+      row.appendChild(nameCell);
   
-      // 價格輸入框
+      // 价格和货币
+      const priceCell = document.createElement("td");
       const priceInput = document.createElement("input");
       priceInput.type = "number";
+      priceInput.className = "product-price";
       priceInput.value = data.price || "";
+      priceInput.min = "0";
+      priceInput.step = "0.01";
+      priceCell.appendChild(priceInput);
   
-      // 貨幣選擇下拉框
       const currencySelect = document.createElement("select");
-      ["韓元", "台幣", "日元", "人民幣", "美元"].forEach(cur => {
+      currencySelect.className = "product-currency";
+      ["韓元", "台幣", "日元", "人民幣", "美元"].forEach(currency => {
         const option = document.createElement("option");
-        option.value = cur;
-        option.textContent = cur;
-        if (data.currency === cur) option.selected = true;
+        option.value = currency;
+        option.textContent = currency;
+        if (data.currency === currency) option.selected = true;
         currencySelect.appendChild(option);
       });
+      priceCell.appendChild(currencySelect);
+      row.appendChild(priceCell);
   
-      // 數量輸入框
+      // 数量
+      const quantityCell = document.createElement("td");
       const quantityInput = document.createElement("input");
       quantityInput.type = "number";
+      quantityInput.className = "product-quantity";
       quantityInput.value = data.quantity || "";
+      quantityInput.min = "0";
+      quantityCell.appendChild(quantityInput);
+      row.appendChild(quantityCell);
   
-      // 保存按鈕
+      // 操作按钮
+      const actionCell = document.createElement("td");
+      actionCell.className = "action-buttons";
+  
       const saveBtn = document.createElement("button");
-      saveBtn.className = "save-btn";
+      saveBtn.className = "btn save-btn";
       saveBtn.textContent = "保存";
       saveBtn.onclick = async () => {
-        const product = {
+        const productData = {
           name: nameInput.value.trim(),
           price: parseFloat(priceInput.value) || 0,
           currency: currencySelect.value,
-          quantity: parseInt(quantityInput.value) || 0
+          quantity: parseInt(quantityInput.value) || 0,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-        
+  
         try {
           if (doc) {
-            await collection.doc(doc.id).update(product);
+            await productsCollection.doc(doc.id).update(productData);
           } else {
-            await collection.add(product);
+            await productsCollection.add(productData);
           }
           alert("✅ 資料已保存");
           loadData();
         } catch (error) {
+          console.error("保存错误:", error);
           alert("❌ 保存失敗: " + error.message);
         }
       };
   
-      // 刪除按鈕
       const deleteBtn = document.createElement("button");
-      deleteBtn.className = "delete-btn";
+      deleteBtn.className = "btn delete-btn";
       deleteBtn.textContent = "刪除";
       deleteBtn.onclick = async () => {
         if (confirm("確定要刪除這條記錄嗎？")) {
-          if (doc) await collection.doc(doc.id).delete();
-          row.remove();
+          try {
+            if (doc) {
+              await productsCollection.doc(doc.id).delete();
+            }
+            row.remove();
+          } catch (error) {
+            console.error("删除错误:", error);
+            alert("❌ 刪除失敗: " + error.message);
+          }
         }
       };
   
-      // 清空行內容並重新添加元素
-      row.innerHTML = "";
-      row.appendChild(document.createElement("td")).appendChild(nameInput);
-      
-      const priceTd = document.createElement("td");
-      priceTd.appendChild(priceInput);
-      priceTd.appendChild(currencySelect);
-      row.appendChild(priceTd);
-      
-      row.appendChild(document.createElement("td")).appendChild(quantityInput);
-      
-      const actionsTd = document.createElement("td");
-      actionsTd.className = "action-buttons";
-      actionsTd.appendChild(saveBtn);
-      actionsTd.appendChild(deleteBtn);
-      row.appendChild(actionsTd);
+      actionCell.appendChild(saveBtn);
+      actionCell.appendChild(deleteBtn);
+      row.appendChild(actionCell);
   
       productList.appendChild(row);
+      return row;
     }
   
     // 添加新商品
     function addProduct() {
       createRow();
+      window.scrollTo(0, document.body.scrollHeight);
     }
   
-    // 加載數據
+    // 加载数据
     async function loadData() {
       try {
-        const snapshot = await collection.get();
+        const querySnapshot = await productsCollection
+          .orderBy("updatedAt", "desc")
+          .get();
+        
         productList.innerHTML = "";
-        snapshot.forEach(doc => createRow(doc, doc.data()));
+        querySnapshot.forEach(doc => {
+          createRow(doc, doc.data());
+        });
       } catch (error) {
+        console.error("加载数据错误:", error);
         alert("加載數據失敗: " + error.message);
       }
     }
   
-    // 刪除所有記錄
+    // 删除所有记录
     async function deleteAllRecords() {
-      if (confirm("⚠️ 確定要刪除所有記錄嗎？此操作無法撤銷！")) {
-        try {
-          const snapshot = await collection.get();
-          const batch = db.batch();
-          
-          snapshot.forEach(doc => {
-            batch.delete(doc.ref);
-          });
-          
-          await batch.commit();
-          alert("✅ 所有記錄已刪除");
-          loadData();
-        } catch (error) {
-          alert("❌ 刪除失敗: " + error.message);
-        }
+      if (!confirm("⚠️ 確定要刪除所有記錄嗎？此操作無法撤銷！")) return;
+      
+      try {
+        const querySnapshot = await productsCollection.get();
+        const batch = db.batch();
+        
+        querySnapshot.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        
+        await batch.commit();
+        alert("✅ 所有記錄已刪除");
+        loadData();
+      } catch (error) {
+        console.error("批量删除错误:", error);
+        alert("❌ 刪除失敗: " + error.message);
       }
     }
   
-    // 頁面加載時自動加載數據
-    window.onload = loadData;
+    // 页面加载时初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 确保DOM已加载
+      if (!productList) {
+        console.error("无法找到 productList 元素");
+        return;
+      }
+      
+      // 添加事件监听器
+      document.getElementById('addProductBtn')?.addEventListener('click', addProduct);
+      document.getElementById('deleteAllBtn')?.addEventListener('click', deleteAllRecords);
+      
+      // 加载数据
+      loadData();
+    });
   </script>
 
 </body>
