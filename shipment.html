@@ -123,14 +123,8 @@
       display: flex;
       gap: 1.25rem;
       margin-bottom: 1.75rem;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeInUp 0.6s 0.9s var(--ease-out-quint) forwards;
-    }
-  
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      opacity: 1; /* 改为直接显示 */
+      transform: none; /* 移除初始动画 */
     }
   
     input[type="text"] {
@@ -157,7 +151,7 @@
       font-weight: 600;
       font-size: 1rem;
       cursor: pointer;
-      transition: all 0.3s var(--ease-out-quint);
+      transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -165,9 +159,8 @@
       position: relative;
       overflow: hidden;
       box-shadow: var(--shadow-sm);
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeInUp 0.6s 1s var(--ease-out-quint) forwards;
+      opacity: 1; /* 改为直接显示 */
+      transform: none; /* 移除初始动画 */
     }
   
     .btn::after {
@@ -278,9 +271,8 @@
     .search-box {
       position: relative;
       margin-bottom: 2.5rem;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeInUp 0.6s 0.9s var(--ease-out-quint) forwards;
+      opacity: 1; /* 改为直接显示 */
+      transform: none; /* 移除初始动画 */
     }
   
     .search-box input {
@@ -345,30 +337,30 @@
       opacity: 0.3;
     }
     .back-to-home-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: linear-gradient(to right, #ec407a, #ba68c8);
-    color: #fff;
-    padding: 14px 28px;
-    font-weight: bold;
-    border-radius: 50px;
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
-    text-decoration: none;
-    transition: transform 0.3s ease;
-    animation: backButtonIn 2s ease-out;
-  }
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(to right, #ec407a, #ba68c8);
+      color: #fff;
+      padding: 14px 28px;
+      font-weight: bold;
+      border-radius: 50px;
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+      text-decoration: none;
+      transition: transform 0.3s ease;
+      animation: backButtonIn 2s ease-out;
+    }
   
-  @keyframes backButtonIn {
-    0% { opacity: 0; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1); }
-  }
+    @keyframes backButtonIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
   
-  .back-to-home-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
-  }
-  </style>
+    .back-to-home-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+    }
+</style>
   
   <div class="particles"></div>
 </head>
@@ -491,6 +483,73 @@
     loadShipments();
   </script>
    <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
-  
+
+   <div class="hamburger" onclick="toggleMenu()">☰</div>
+
+   <!-- 側邊選單 -->
+   <nav class="side-menu" id="sideMenu">
+     <a href="quotation.html">報價系統</a>
+     <a href="orders.html">訂單管理</a>
+     <a href="products.html">庫存管理</a>
+     <a href="report.html">報表分析</a>
+     <a href="link-management.html">網址連結管理</a>
+     <a href="blacklist.html">黑名單</a>
+   </nav>
+   <style>
+       .hamburger {
+     font-size: 2rem;
+     position: fixed;
+     top: 20px;
+     left: 20px;
+     cursor: pointer;
+     z-index: 1001;
+     background: linear-gradient(to right, #ff80ab, #ffb6c1);
+     color: white;
+     padding: 10px 20px;
+     border-radius: 10px;
+     box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+   }
+   
+   .side-menu {
+     position: fixed;
+     top: 0;
+     left: -250px;
+     width: 220px;
+     height: 100%;
+     background: rgba(255, 192, 203, 0.95);
+     backdrop-filter: blur(20px);
+     box-shadow: 5px 0 20px rgba(255, 105, 180, 0.3);
+     display: flex;
+     flex-direction: column;
+     padding-top: 80px;
+     transition: left 0.3s ease;
+     z-index: 1000;
+   }
+   
+   .side-menu a {
+     padding: 20px;
+     color: white;
+     text-decoration: none;
+     font-weight: bold;
+     font-size: 1.1rem;
+     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+     transition: background 0.3s;
+   }
+   
+   .side-menu a:hover {
+     background: rgba(255, 105, 180, 0.2);
+   }
+   
+   </style>
+   <script>
+       function toggleMenu() {
+         const menu = document.getElementById("sideMenu");
+         if (menu.style.left === "0px") {
+           menu.style.left = "-250px";
+         } else {
+           menu.style.left = "0px";
+         }
+       }
+     </script>
 </body>
 </html>
