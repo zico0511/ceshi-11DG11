@@ -400,5 +400,72 @@
         });
       });
   </script>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+
+    <!-- 側邊選單 -->
+    <nav class="side-menu" id="sideMenu">
+      <a href="quotation.html">報價系統</a>
+      <a href="orders.html">訂單管理</a>
+      <a href="products.html">庫存管理</a>
+      <a href="shipment.html">出貨管理</a>
+      <a href="report.html">報表分析</a>
+      <a href="blacklist.html">黑名單</a>
+    </nav>
+    <style>
+        .hamburger {
+      font-size: 2rem;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      cursor: pointer;
+      z-index: 1001;
+      background: linear-gradient(to right, #ff80ab, #ffb6c1);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+    }
+    
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 220px;
+      height: 100%;
+      background: rgba(255, 192, 203, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 5px 0 20px rgba(255, 105, 180, 0.3);
+      display: flex;
+      flex-direction: column;
+      padding-top: 80px;
+      transition: left 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .side-menu a {
+      padding: 20px;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      transition: background 0.3s;
+    }
+    
+    .side-menu a:hover {
+      background: rgba(255, 105, 180, 0.2);
+    }
+    
+    </style>
+    <script>
+        function toggleMenu() {
+          const menu = document.getElementById("sideMenu");
+          if (menu.style.left === "0px") {
+            menu.style.left = "-250px";
+          } else {
+            menu.style.left = "0px";
+          }
+        }
+      </script>
 </body>
 </html>
