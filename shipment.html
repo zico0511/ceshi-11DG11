@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="favicon.png">
   <title>出貨管理</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -343,6 +344,30 @@
       background: radial-gradient(circle at 50% 50%, var(--primary-10) 0%, transparent 70%);
       opacity: 0.3;
     }
+    .back-to-home-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(to right, #ec407a, #ba68c8);
+    color: #fff;
+    padding: 14px 28px;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+    text-decoration: none;
+    transition: transform 0.3s ease;
+    animation: backButtonIn 2s ease-out;
+  }
+  
+  @keyframes backButtonIn {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  
+  .back-to-home-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+  }
   </style>
   
   <div class="particles"></div>
@@ -465,6 +490,7 @@
 
     loadShipments();
   </script>
+   <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
   
 </body>
 </html>
