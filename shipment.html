@@ -360,6 +360,13 @@
       transform: scale(1.1);
       box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
     }
+
+    .edit-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 2px;
+}
+
 </style>
   
   <div class="particles"></div>
@@ -401,9 +408,9 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
       getFirestore, collection, addDoc, getDocs, doc,
-      updateDoc, deleteDoc, query, where
+      updateDoc, deleteDoc, query, where, orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+  
     const firebaseConfig = {
       apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
       authDomain: "dg11-c954c.firebaseapp.com",
@@ -412,53 +419,85 @@
       messagingSenderId: "1010585577335",
       appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
     };
-
+  
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const shipmentRef = collection(db, "shipments");
-
+  
     const tableBody = document.querySelector("#shipmentTable tbody");
     const searchInput = document.getElementById("searchInput");
-
+  
     async function loadShipments(filter = "") {
       tableBody.innerHTML = "";
-      let q = shipmentRef;
+      let q = query(shipmentRef, orderBy("timestamp", "desc"));
+  
       if (filter.trim()) {
-        q = query(shipmentRef, where("id", ">=", filter), where("id", "<=", filter + '\uf8ff'));
+        q = query(
+          shipmentRef,
+          where("id", ">=", filter),
+          where("id", "<=", filter + "\uf8ff"),
+          orderBy("id"),
+          orderBy("timestamp", "desc")
+        );
       }
+  
       const snapshot = await getDocs(q);
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const row = document.createElement("tr");
         row.className = data.shipped ? "shipped" : "unshipped";
         row.innerHTML = `
-          <td>${data.id}</td>
-          <td>${data.product}</td>
-          <td>${data.customer}</td>
+          <td><span class="text" data-field="id">${data.id}</span><input class="edit-input" type="text" value="${data.id}" style="display:none;" /></td>
+          <td><span class="text" data-field="product">${data.product}</span><input class="edit-input" type="text" value="${data.product}" style="display:none;" /></td>
+          <td><span class="text" data-field="customer">${data.customer}</span><input class="edit-input" type="text" value="${data.customer}" style="display:none;" /></td>
           <td>${data.shipped ? "✅ 已出貨" : "❌ 未出貨"}</td>
           <td>
             <button class="btn" onclick="toggleShipment('${docSnap.id}', ${data.shipped})">切換</button>
+            <button class="btn warning" onclick="enableEdit(this)">✏️ 編輯</button>
+            <button class="btn success" onclick="saveEdit(this, '${docSnap.id}')" style="display:none;">💾 儲存</button>
             <button class="btn danger" onclick="deleteShipment('${docSnap.id}')">刪除</button>
           </td>
         `;
         tableBody.appendChild(row);
       });
     }
-
+  
     window.toggleShipment = async (docId, currentStatus) => {
       await updateDoc(doc(db, "shipments", docId), {
-        shipped: !currentStatus
+        shipped: !currentStatus,
+        timestamp: Date.now()
       });
       loadShipments(searchInput.value);
     };
-
+  
     window.deleteShipment = async (docId) => {
       if (confirm("確定要刪除這筆出貨紀錄嗎？")) {
         await deleteDoc(doc(db, "shipments", docId));
         loadShipments(searchInput.value);
       }
     };
-
+  
+    window.enableEdit = (btn) => {
+      const row = btn.closest("tr");
+      row.querySelectorAll(".text").forEach(span => span.style.display = "none");
+      row.querySelectorAll(".edit-input").forEach(input => input.style.display = "inline");
+      row.querySelector(".btn.warning").style.display = "none";
+      row.querySelector(".btn.success").style.display = "inline";
+    };
+  
+    window.saveEdit = async (btn, docId) => {
+      const row = btn.closest("tr");
+      const inputs = row.querySelectorAll(".edit-input");
+      const updatedData = {
+        id: inputs[0].value.trim(),
+        product: inputs[1].value.trim(),
+        customer: inputs[2].value.trim(),
+        timestamp: Date.now()
+      };
+      await updateDoc(doc(db, "shipments", docId), updatedData);
+      loadShipments(searchInput.value);
+    };
+  
     document.getElementById("addForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const id = document.getElementById("orderId").value.trim();
@@ -469,19 +508,22 @@
           id,
           product,
           customer,
-          shipped: false
+          shipped: false,
+          timestamp: Date.now()
         });
         e.target.reset();
         loadShipments();
       }
     });
-
+  
     document.getElementById("searchInput").addEventListener("input", () => {
       loadShipments(searchInput.value);
     });
-
+  
     loadShipments();
   </script>
+  
+  
    <a href="home.html" class="back-to-home-btn">🏠 返回主頁</a>
 
    <div class="hamburger" onclick="toggleMenu()">☰</div>
