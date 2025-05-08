@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>11DG11-快速商品登記</title>
+  <link rel="icon" href="favicon.png">
+  <style>
+    :root {
+      --main-pink: #f48fb1;
+      --hover-pink: #f06292;
+      --light-pink: #fff0f5;
+      --border-color: #f8bbd0;
+      --text-color: #880e4f;
+      --background: #fff7fb;
+    }
+  
+    * {
+      box-sizing: border-box;
+    }
+  
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--background);
+      padding: 20px;
+      color: var(--text-color);
+      margin: 0;
+    }
+  
+    h1, h2 {
+      text-align: center;
+      color: var(--text-color);
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+  
+    form, .table-container {
+      max-width: 960px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(244, 143, 177, 0.2);
+    }
+  
+    input {
+      padding: 12px;
+      width: 100%;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      transition: 0.2s ease;
+      font-size: 16px;
+    }
+  
+    input:focus {
+      border-color: var(--main-pink);
+      outline: none;
+      box-shadow: 0 0 4px var(--main-pink);
+    }
+  
+    button {
+      background: var(--main-pink);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.2s ease;
+    }
+  
+    button:hover {
+      background: var(--hover-pink);
+    }
+  
+    .table-container {
+      overflow-x: auto;
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: white;
+      min-width: 600px;
+    }
+  
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      text-align: center;
+      font-size: 15px;
+    }
+  
+    th {
+      background: var(--light-pink);
+      color: var(--text-color);
+    }
+  
+    .actions button {
+      margin: 0 4px;
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+  
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      max-width: 960px;
+      margin: 0 auto 20px auto;
+      flex-wrap: wrap;
+    }
+  
+    .search-bar input {
+      flex: 1 1 200px;
+      min-width: 150px;
+    }
+  
+    @media (max-width: 768px) {
+      form, .table-container {
+        padding: 15px;
+      }
+  
+      input, button {
+        font-size: 15px;
+      }
+  
+      .search-bar {
+        flex-direction: column;
+      }
+  
+      .search-bar input {
+        width: 100%;
+      }
+    }
+  
+    @media (max-width: 480px) {
+      h1, h2 {
+        font-size: 20px;
+      }
+  
+      th, td {
+        font-size: 13px;
+        padding: 8px;
+      }
+  
+      button {
+        font-size: 14px;
+        padding: 8px 14px;
+      }
+    }
+  </style>
+  
+  
+<body>
+
+  <h1>11DG11-快速商品登記</h1>
+
+  <form id="orderForm">
+    <input type="text" id="customerName" placeholder="客戶姓名" required />
+    <input type="text" id="productName" placeholder="商品名稱" required />
+    <input type="text" id="shade" placeholder="色號" required />
+    <button type="submit">登記 / 更新</button>
+    <input type="hidden" id="editId" />
+  </form>
+
+  <div class="search-bar" style="max-width:800px; margin:auto;">
+    <input type="text" id="searchInput" placeholder="搜尋：客戶 / 商品 / 色號" />
+    <button onclick="loadStats()">清除搜尋</button>
+  </div>
+
+  <div style="max-width: 1000px; margin: auto;">
+    <h2>訂單紀錄</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>客戶</th>
+          <th>商品</th>
+          <th>色號</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="orderList"></tbody>
+    </table>
+
+    <h2>統計總覽</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>商品名稱</th>
+          <th>色號</th>
+          <th>需求數</th>
+          <th>客戶名單</th>
+        </tr>
+      </thead>
+      <tbody id="orderStats"></tbody>
+    </table>
+
+    <button style="margin-top:20px;" onclick="exportToExcel()">匯出 Excel</button>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <!-- 匯出 Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+  <script>
+    // Firebase 設定（請替換為你的資訊）
+    const firebaseConfig = {
+  apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+  authDomain: "dg11-c954c.firebaseapp.com",
+  projectId: "dg11-c954c",
+  storageBucket: "dg11-c954c.firebasestorage.app",
+  messagingSenderId: "1010585577335",
+  appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const collection = db.collection("order_registrations"); // ✅ 使用專屬集合
+
+    const form = document.getElementById("orderForm");
+    const orderList = document.getElementById("orderList");
+    const orderStats = document.getElementById("orderStats");
+    const searchInput = document.getElementById("searchInput");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("customerName").value.trim();
+      const product = document.getElementById("productName").value.trim();
+      const shade = document.getElementById("shade").value.trim();
+      const editId = document.getElementById("editId").value;
+
+      if (editId) {
+        await collection.doc(editId).update({ customer: name, product, shade });
+        document.getElementById("editId").value = "";
+      } else {
+        await collection.add({ customer: name, product, shade, timestamp: new Date() });
+      }
+
+      form.reset();
+      loadOrders();
+      loadStats();
+    });
+
+    async function loadOrders() {
+      const query = searchInput.value.trim().toLowerCase();
+      const snapshot = await collection.orderBy("timestamp", "desc").get();
+      orderList.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const { customer, product, shade } = doc.data();
+        if (query && ![customer, product, shade].some(v => v.toLowerCase().includes(query))) return;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${customer}</td>
+          <td>${product}</td>
+          <td>${shade}</td>
+          <td class="actions">
+            <button onclick="editOrder('${doc.id}', '${customer}', '${product}', '${shade}')">✏️</button>
+            <button onclick="deleteOrder('${doc.id}')">🗑️</button>
+          </td>
+        `;
+        orderList.appendChild(row);
+      });
+    }
+
+    async function deleteOrder(id) {
+      if (confirm("確定要刪除此筆紀錄？")) {
+        await collection.doc(id).delete();
+        loadOrders();
+        loadStats();
+      }
+    }
+
+    function editOrder(id, customer, product, shade) {
+      document.getElementById("customerName").value = customer;
+      document.getElementById("productName").value = product;
+      document.getElementById("shade").value = shade;
+      document.getElementById("editId").value = id;
+    }
+
+    async function loadStats() {
+      const snapshot = await collection.get();
+      const stats = {};
+
+      snapshot.forEach(doc => {
+        const { customer, product, shade } = doc.data();
+        const key = `${product}__${shade}`;
+        if (!stats[key]) {
+          stats[key] = { product, shade, quantity: 0, customers: [] };
+        }
+        stats[key].quantity++;
+        stats[key].customers.push(customer);
+      });
+
+      orderStats.innerHTML = "";
+      Object.values(stats).forEach(entry => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${entry.product}</td>
+          <td>${entry.shade}</td>
+          <td>${entry.quantity}</td>
+          <td>${[...new Set(entry.customers)].join(", ")}</td>
+        `;
+        orderStats.appendChild(row);
+      });
+    }
+
+    function exportToExcel() {
+      const rows = [];
+      document.querySelectorAll("#orderStats tr").forEach(tr => {
+        const cells = tr.querySelectorAll("td");
+        rows.push({
+          商品名稱: cells[0].innerText,
+          色號: cells[1].innerText,
+          數量: cells[2].innerText,
+          客戶名單: cells[3].innerText
+        });
+      });
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "統計");
+      XLSX.writeFile(wb, "快速登記統計.xlsx");
+    }
+
+    searchInput.addEventListener("input", loadOrders);
+
+    // 初始化
+    loadOrders();
+    loadStats();
+  </script>
+
+<div class="hamburger" onclick="toggleMenu()">☰</div>
+
+<!-- 側邊選單 -->
+<nav class="side-menu" id="sideMenu">
+  <a href="quotation.html">報價系統</a>
+  <a href="products.html">庫存管理</a>
+  <a href="shipment.html">出貨管理</a>
+  <a href="report.html">報表分析</a>
+  <a href="link-management.html">網址連結管理</a>
+  <a href="blacklist.html">黑名單</a>
+</nav>
+<style>
+    .hamburger {
+  font-size: 2rem;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  cursor: pointer;
+  z-index: 1001;
+  background: linear-gradient(to right, #ff80ab, #ffb6c1);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 220px;
+  height: 100%;
+  background: rgba(255, 192, 203, 0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 5px 0 20px rgba(255, 105, 180, 0.3);
+  display: flex;
+  flex-direction: column;
+  padding-top: 80px;
+  transition: left 0.3s ease;
+  z-index: 1000;
+}
+
+.side-menu a {
+  padding: 20px;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  transition: background 0.3s;
+}
+
+.side-menu a:hover {
+  background: rgba(255, 105, 180, 0.2);
+}
+
+</style>
+<script>
+    function toggleMenu() {
+      const menu = document.getElementById("sideMenu");
+      if (menu.style.left === "0px") {
+        menu.style.left = "-250px";
+      } else {
+        menu.style.left = "0px";
+      }
+    }
+  </script>
+  
+</body>
+</html>
