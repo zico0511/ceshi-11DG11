@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>11DG11-主頁</title>
+  <title>11DG11 主頁</title>
   <link rel="icon" href="favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
   <style>
@@ -254,14 +255,14 @@
 
 <script>
   // ✅ 初始化 Firebase（如果尚未初始化）
-const firebaseConfig = {
-  apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
-  authDomain: "dg11-c954c.firebaseapp.com",
-  projectId: "dg11-c954c",
-  storageBucket: "dg11-c954c.firebasestorage.app",
-  messagingSenderId: "1010585577335",
-  appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+    authDomain: "dg11-c954c.firebaseapp.com",
+    projectId: "dg11-c954c",
+    storageBucket: "dg11-c954c.firebasestorage.app",
+    messagingSenderId: "1010585577335",
+    appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+  };
 
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
@@ -269,29 +270,34 @@ const firebaseConfig = {
 
   const db = firebase.firestore();
 
-  // ✅ 顯示登入用戶資訊
+  // ✅ 驗證是否已登入，否則導回登入頁
   window.addEventListener('DOMContentLoaded', function () {
     const userId = sessionStorage.getItem('loggedInUserId'); // 必須在登入時先存這個 ID
 
-    if (userId) {
-      db.collection('users').doc(userId).get()
-        .then((doc) => {
-          if (doc.exists) {
-            const userData = doc.data();
-            document.getElementById('user-id').textContent = `已登入：${userData.username}`;
-          } else {
-            document.getElementById('user-id').textContent = '找不到使用者';
-          }
-        })
-        .catch((error) => {
-          console.error("查詢錯誤：", error);
-          document.getElementById('user-id').textContent = '讀取失敗';
-        });
-    } else {
-      document.getElementById('user-id').textContent = '尚未登入';
+    if (!userId) {
+      // 未登入，自動跳轉回登入頁
+      alert('請先登入');
+      window.location.href = 'index.html';
+      return;
     }
+
+    // 已登入，顯示用戶名稱
+    db.collection('users').doc(userId).get()
+      .then((doc) => {
+        if (doc.exists) {
+          const userData = doc.data();
+          document.getElementById('user-id').textContent = `已登入：${userData.username}`;
+        } else {
+          document.getElementById('user-id').textContent = '找不到使用者';
+        }
+      })
+      .catch((error) => {
+        console.error("查詢錯誤：", error);
+        document.getElementById('user-id').textContent = '讀取失敗';
+      });
   });
 </script>
+
 
 </body>
 </html>
