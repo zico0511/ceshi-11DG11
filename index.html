@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>11DG11-登入系統</title>
+  <title>登入 - 11DG11</title>
   <link rel="icon" href="favicon.png">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
@@ -120,61 +120,61 @@
     <p style="text-align: center;">還沒有帳號？<a href="register.html" class="link-button">立即註冊</a></p>
   </div>
   
-  <!-- ✅ Firebase v8 -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<!-- ✅ Firebase v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-  <script>
-    // ✅ Firebase 設定
-    var firebaseConfig = {
-      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
-      authDomain: "dg11-c954c.firebaseapp.com",
-      projectId: "dg11-c954c",
-      storageBucket: "dg11-c954c.appspot.com",
-      messagingSenderId: "1010585577335",
-      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
-    };
-  
-    // 初始化 Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-  
-    // 登入表單提交事件
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-  
-      const username = document.getElementById('loginUsername').value;
-      const password = document.getElementById('loginPassword').value;
-  
-      // 查詢 Firestore 中的用戶資料
-      db.collection("users").where("username", "==", username)
-        .get()
-        .then((querySnapshot) => {
-          if (querySnapshot.empty) {
-            alert("找不到此用戶名，請註冊帳號");
-            return;
-          }
-  
-          // 取得用戶資料
-          const userDoc = querySnapshot.docs[0];
-          const userData = userDoc.data();
-  
-          // 檢查密碼是否正確
-          if (userData.password === password) {
-            sessionStorage.setItem('loggedInUserId', userDoc.id);
-            alert("登入成功！");
-            localStorage.setItem('loggedInUser', username);  // 儲存登入的用戶名
-            window.location.href = 'home.html'; // 登入成功後跳轉到主頁
-          } else {
-            alert("密碼錯誤！");
-          }
-        })
-        .catch((error) => {
-          console.error("登入錯誤：", error);
-          alert("登入失敗，請稍後再試");
-        });
-    });
-  </script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+    authDomain: "dg11-c954c.firebaseapp.com",
+    projectId: "dg11-c954c",
+    storageBucket: "dg11-c954c.firebasestorage.app",
+    messagingSenderId: "1010585577335",
+    appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+      // 先從 Firestore 找到對應 username 的 email
+      const snapshot = await db.collection("users").where("username", "==", username).get();
+
+      if (snapshot.empty) {
+        alert("找不到此用戶名，請確認輸入");
+        return;
+      }
+
+      const userData = snapshot.docs[0].data();
+      const email = userData.email;
+
+      // 用 Firebase Auth 登入
+      await auth.signInWithEmailAndPassword(email, password);
+
+      // 登入成功
+      sessionStorage.setItem('loggedInUserId', snapshot.docs[0].id);
+      localStorage.setItem('loggedInUser', username);
+
+      alert("登入成功！");
+      window.location.href = 'home.html';
+    } catch (error) {
+      console.error("登入錯誤：", error);
+      alert("登入失敗：" + error.message);
+    }
+  });
+</script>
+
+
+
 
 </body>
 </html>
