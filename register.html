@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>11DG11-註冊系統</title>
-  <link rel="icon" href="favicon.png">
+  <title>註冊 - 11DG11</title>
+  <link rel="icon" href="favicon.png" />
   <style>
     body {
       font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
@@ -108,171 +108,169 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>註冊帳號</h1>
-    <form id="registerForm">
-      <label for="username">用戶名</label>
-      <input type="text" id="username" required placeholder="輸入用戶名" />
+<div class="container">
+  <h1>註冊帳號</h1>
+  <form id="registerForm">
+    <label for="username">用戶名</label>
+    <input type="text" id="username" required placeholder="輸入用戶名" />
 
-      <label for="password">密碼</label>
-      <input type="password" id="password" required placeholder="輸入密碼" />
+    <label for="verifyEmail">授權 Email</label>
+    <input type="email" id="verifyEmail" required placeholder="輸入授權 Email" />
 
-      <label for="confirmPassword">確認密碼</label>
-      <input type="password" id="confirmPassword" required placeholder="再次輸入密碼" />
+    <label for="password">密碼</label>
+    <input type="password" id="password" required placeholder="輸入密碼" />
 
-      <button type="submit">註冊</button>
-    </form>
+    <label for="confirmPassword">確認密碼</label>
+    <input type="password" id="confirmPassword" required placeholder="再次輸入密碼" />
 
-    <div class="section">
-      <form id="emailVerifyForm">
-        <label for="verifyEmail">限定 Email</label>
-        <input type="email" id="verifyEmail" required placeholder="輸入授權 Email" />
-        <button type="submit">發送驗證碼</button>
-      </form>
+    <div>
+      <button type="button" id="sendCodeBtn">發送驗證碼</button>
     </div>
 
-    <div class="section" id="codeSection" style="display: none;">
+    <div id="codeSection" style="display: none;">
       <label for="verifyCode">輸入驗證碼</label>
-      <input type="text" id="verifyCode" required placeholder="六位數驗證碼" />
-      <button onclick="verifyCode()">驗證</button>
+      <input type="text" id="verifyCode" placeholder="六位數驗證碼" />
+      <button type="button" id="verifyBtn">驗證</button>
     </div>
 
-    <a href="index.html" class="link-button">已經有帳號？登入</a>
-  </div>
+    <button type="submit">註冊</button>
+  </form>
 
-  <!-- JS scripts 放置於底部 -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <a href="index.html" class="link-button">已有帳號？前往登入</a>
+</div>
 
 
+<!-- Firebase + EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-  <script>
-    let isVerified = false;
-  
-    emailjs.init('x7qRqNbN7C3eGzGQP');
-  
-    var firebaseConfig = {
-      apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
-      authDomain: "dg11-c954c.firebaseapp.com",
-      projectId: "dg11-c954c",
-      storageBucket: "dg11-c954c.appspot.com",
-      messagingSenderId: "1010585577335",
-      appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
-    };
-  
-    firebase.initializeApp(firebaseConfig);
-    var db = firebase.firestore();
-  
-    const fixedEmail = "q5413692@gmail.com";
-  
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById('registerForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-  
-        if (!isVerified) {
-          alert('請先完成 Email 驗證後再註冊！');
-          return;
-        }
-  
-        if (password !== confirmPassword) {
-          alert('密碼不一致！');
-          return;
-        }
-  
-        // 檢查用戶是否已經註冊
-        db.collection('users').where('username', '==', username)
-          .get()
-          .then((querySnapshot) => {
-            if (!querySnapshot.empty) {
-              alert('此帳號已經存在！');
-              return;
-            }
-  
-        // 儲存新用戶資料到 Firestore
-        db.collection("users").add({
-          username: username,
-          password: password,
-          loggedIn: false  // 初始狀態設定為未登入
-        })
-            .then(() => {
-              alert('註冊成功！');
-              window.location.href = 'index.html'; // 註冊成功後跳轉到登入頁
-            })
-            .catch((error) => {
-              console.error("註冊錯誤：", error);
-              alert("註冊失敗，請稍後再試");
-            });
-          })
-          .catch((error) => {
-            console.error("檢查用戶存在錯誤：", error);
-            alert("檢查用戶是否存在時發生錯誤");
-          });
-      });
-  
-      const form = document.getElementById('emailVerifyForm');
-  
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('verifyEmail').value.trim();
-  
-        if (email !== fixedEmail) {
-          alert("此 Email 無授權註冊");
-          return;
-        }
-  
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = new Date().getTime() + 5 * 60 * 1000;
-  
-        try {
-          await db.collection('verifications').doc(email).set({ code, expiresAt });
-  
-          await emailjs.send('service_3b5o83t', 'Verification Code Templa', {
-            to_email: email,
-            code: code
-          });
-  
-          alert("驗證碼已寄出！");
-          document.getElementById('codeSection').style.display = 'block';
-        } catch (err) {
-          console.error("寄送失敗：", err);
-          alert("寄送失敗，請稍後再試");
-        }
-      });
+<script>
+// 初始化 EmailJS
+emailjs.init('x7qRqNbN7C3eGzGQP');
+
+// Firebase 配置
+const firebaseConfig = {
+  apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+  authDomain: "dg11-c954c.firebaseapp.com",
+  projectId: "dg11-c954c",
+  storageBucket: "dg11-c954c.firebasestorage.app",
+  messagingSenderId: "1010585577335",
+  appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const fixedEmail = "q5413692@gmail.com";
+let isVerified = false;
+
+// 發送驗證碼
+async function sendVerificationCode() {
+  const email = document.getElementById('verifyEmail').value.trim();
+
+  if (email !== fixedEmail) {
+    alert("此 Email 無授權註冊");
+    return;
+  }
+
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date().getTime() + 5 * 60 * 1000;
+
+  try {
+    await db.collection('verifications').doc(email).set({ code, expiresAt });
+
+    await emailjs.send('service_3b5o83t', 'Verification Code Templa', {
+      to_email: email,
+      code: code
     });
-  
-    async function verifyCode() {
-      const email = document.getElementById('verifyEmail').value.trim();
-      const userCode = document.getElementById('verifyCode').value.trim();
-  
-      try {
-        const docRef = db.collection('verifications').doc(email);
-        const docSnap = await docRef.get();
-  
-        if (!docSnap.exists) {
-          alert("找不到驗證紀錄，請重新請求驗證碼");
-          return;
-        }
-  
-        const data = docSnap.data();
-        const now = new Date().getTime();
-  
-        if (now > data.expiresAt) {
-          alert("驗證碼已過期，請重新發送");
-        } else if (userCode === data.code) {
-          isVerified = true;
-          alert("✅ 驗證成功！可以註冊帳號了");
-        } else {
-          alert("驗證碼錯誤，請重新輸入");
-        }
-      } catch (err) {
-        console.error("驗證錯誤：", err);
-        alert("驗證失敗，請稍後再試");
-      }
+
+    alert("✅ 驗證碼已寄出！");
+    document.getElementById('codeSection').style.display = 'block';
+  } catch (err) {
+    console.error("寄送驗證碼錯誤：", err);
+    alert("寄送失敗，請稍後再試");
+  }
+}
+
+// 驗證驗證碼
+async function verifyCode() {
+  const email = document.getElementById('verifyEmail').value.trim();
+  const userCode = document.getElementById('verifyCode').value.trim();
+
+  try {
+    const docRef = db.collection('verifications').doc(email);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      alert("找不到驗證紀錄，請重新請求驗證碼");
+      return;
     }
-  </script>
+
+    const data = docSnap.data();
+    const now = new Date().getTime();
+
+    if (now > data.expiresAt) {
+      alert("驗證碼已過期，請重新發送");
+    } else if (userCode === data.code) {
+      isVerified = true;
+      alert("✅ 驗證成功！請繼續註冊");
+    } else {
+      alert("驗證碼錯誤，請重新輸入");
+    }
+  } catch (err) {
+    console.error("驗證錯誤：", err);
+    alert("驗證失敗，請稍後再試");
+  }
+}
+
+// 註冊表單提交處理
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const username = document.getElementById('username').value;
+  const email = document.getElementById('verifyEmail').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  if (!isVerified) {
+    alert('請先完成 Email 驗證後再註冊！');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert('密碼不一致！');
+    return;
+  }
+
+  try {
+    // 建立 Firebase Auth 帳號
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = userCredential.user.uid;
+
+    // Firestore 額外資料
+    await db.collection('users').doc(uid).set({
+      username: username,
+      email: email,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    alert('✅ 註冊成功！請登入');
+    window.location.href = 'index.html'; // 註冊成功後跳轉到登入頁
+  } catch (err) {
+    console.error("註冊錯誤：", err);
+    alert("註冊失敗：" + err.message);
+  }
+});
+
+// 綁定事件：發送驗證碼
+document.getElementById('sendCodeBtn').addEventListener('click', sendVerificationCode);
+
+// 綁定事件：驗證驗證碼
+document.getElementById('verifyBtn').addEventListener('click', verifyCode);
+</script>
+
+
 </body>
 </html>
