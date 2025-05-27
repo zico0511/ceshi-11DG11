@@ -342,6 +342,7 @@
                                     <label for="productImage" class="form-label">商品圖片</label>
                                     <input class="form-control" type="file" id="productImage" accept="image/*">
                                     <img id="imagePreview" class="preview-image mt-2" alt="圖片預覽">
+                                    <small class="form-text text-muted">您也可以直接貼上圖片（Ctrl + V）</small>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="productId" class="form-label">商品編號</label>
@@ -501,7 +502,6 @@
     </div>
 
   <a href="home.html" class="return-home-btn">🏠 返回主頁</a>
-<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
@@ -525,13 +525,13 @@
   import html2canvas from "https://cdn.skypack.dev/html2canvas";
 
   const firebaseConfig = {
-  apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
-  authDomain: "dg11-c954c.firebaseapp.com",
-  projectId: "dg11-c954c",
-  storageBucket: "dg11-c954c.firebasestorage.app",
-  messagingSenderId: "1010585577335",
-  appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
-};
+    apiKey: "AIzaSyCT0Li1XXZ4hZjBTrU8rp1N-ixV5dTrSZQ",
+    authDomain: "dg11-c954c.firebaseapp.com",
+    projectId: "dg11-c954c",
+    storageBucket: "dg11-c954c.firebasestorage.app",
+    messagingSenderId: "1010585577335",
+    appId: "1:1010585577335:web:ad4f84c5205ba048b22372"
+  };
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
@@ -543,23 +543,41 @@
     const productImageInput = document.getElementById('productImage');
     const imagePreview = document.getElementById('imagePreview');
     const resultImagePreview = document.getElementById('resultImagePreview');
+    const resultContainer = document.getElementById('resultContainer');
 
+    // 處理文件選擇
     productImageInput.addEventListener('change', function (e) {
-      selectedImageFile = e.target.files[0];
-      if (selectedImageFile) {
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          imagePreview.src = event.target.result;
-          imagePreview.style.display = 'block';
-          resultImagePreview.src = event.target.result;
-          resultImagePreview.style.display = 'block';
-        };
-        reader.readAsDataURL(selectedImageFile);
+      handleImageFile(e.target.files[0]);
+    });
+
+    // 添加粘貼圖片功能
+    document.addEventListener('paste', function(e) {
+      // 檢查是否粘貼的是圖片
+      for (let item of e.clipboardData.items) {
+        if (item.type.indexOf('image') !== -1) {
+          const blob = item.getAsFile();
+          handleImageFile(blob);
+          break;
+        }
       }
     });
 
+    // 處理圖片文件的通用函數
+    function handleImageFile(file) {
+      if (!file) return;
+      
+      selectedImageFile = file;
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        imagePreview.src = event.target.result;
+        imagePreview.style.display = 'block';
+        resultImagePreview.src = event.target.result;
+        resultImagePreview.style.display = 'block';
+      };
+      reader.readAsDataURL(selectedImageFile);
+    }
+
     const quotationForm = document.getElementById('quotationForm');
-    const resultContainer = document.getElementById('resultContainer');
     const saveRecordBtn = document.getElementById('saveRecordBtn');
 
     quotationForm.addEventListener('submit', function (e) {
@@ -631,7 +649,7 @@
       try {
         let imageUrl = '';
         if (selectedImageFile) {
-          const storageRef = ref(storage, `quotation_images/${Date.now()}_${selectedImageFile.name}`);
+          const storageRef = ref(storage, `quotation_images/${Date.now()}_${selectedImageFile.name || 'pasted_image.png'}`);
           const snapshot = await uploadBytes(storageRef, selectedImageFile);
           imageUrl = await getDownloadURL(snapshot.ref);
         }
@@ -673,8 +691,8 @@
           const data = docSnap.data();
           const historyItem = document.createElement('div');
           historyItem.className = 'col-md-6';
-          historyItem.innerHTML = `
-            <div class="history-item">
+          historyItem.innerHTML = 
+            `<div class="history-item">
               <div class="d-flex justify-content-between align-items-start">
                 <div>
                   <h6>${data.productName || '未命名商品'}</h6>
@@ -695,8 +713,7 @@
                 <p class="mb-0"><small class="text-muted">${data.dateString || ''}</small></p>
               </div>
               ${data.imageUrl ? `<img src="${data.imageUrl}" class="img-thumbnail mt-2" style="max-height: 100px;">` : ''}
-            </div>
-          `;
+            </div>`;
           historyList.appendChild(historyItem);
         });
 
@@ -751,7 +768,6 @@
       }
     }
 
-    // 新增清除所有歷史記錄功能
     async function clearAllHistory() {
       if (confirm('確定要刪除所有歷史記錄嗎？此操作無法復原！')) {
         try {
@@ -770,7 +786,6 @@
       }
     }
 
-    // 綁定清除所有歷史記錄按鈕事件
     document.getElementById('clearAllHistoryBtn')?.addEventListener('click', clearAllHistory);
 
     document.getElementById('historySearch')?.addEventListener('input', function () {
@@ -798,7 +813,6 @@
     });
 
     document.getElementById('downloadQuoteBtn')?.addEventListener('click', async () => {
-      const resultContainer = document.getElementById('resultContainer');
       if (!resultContainer) return;
       try {
         const canvas = await html2canvas(resultContainer);
